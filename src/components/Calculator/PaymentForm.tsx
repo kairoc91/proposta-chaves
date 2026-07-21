@@ -229,7 +229,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {/* Percentual Lançado / Percentual Restante Não Lançado */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', fontWeight: 700 }}>
-            <span style={{ color: 'var(--color-success)', background: 'rgba(34, 197, 94, 0.12)', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-sm)' }} title="Percentual Lançado">
+            <span style={{ color: 'var(--color-primary)', background: 'rgba(214, 255, 0, 0.12)', border: '1px solid rgba(214, 255, 0, 0.25)', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-sm)' }} title="Percentual Lançado">
               {formatPercentSimple(launchedPercent)}
             </span>
             <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>/</span>

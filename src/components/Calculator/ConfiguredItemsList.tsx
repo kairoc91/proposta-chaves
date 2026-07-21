@@ -84,7 +84,7 @@ export const ConfiguredItemsList: React.FC<ConfiguredItemsListProps> = ({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {!isExpanded && (
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-primary)', background: 'rgba(214, 255, 0, 0.1)', padding: '0.25rem 0.65rem', borderRadius: 'var(--radius-sm)' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-primary)', background: 'rgba(214, 255, 0, 0.12)', border: '1px solid rgba(214, 255, 0, 0.25)', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-sm)' }}>
               {paymentItems.length} {paymentItems.length === 1 ? 'item' : 'itens'}
             </span>
           )}
