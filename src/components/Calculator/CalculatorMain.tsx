@@ -7,12 +7,15 @@ import { PaymentForm } from './PaymentForm';
 import { ConfiguredItemsList } from './ConfiguredItemsList';
 
 
+import { generateProposalPDF } from '../../utils/pdfGenerator';
+
 export const CalculatorMain: React.FC = () => {
   // Inicialização com valores zerados
   const [totalProposal, setTotalProposal] = useState<number>(0);
   const [keyDeliveryDate, setKeyDeliveryDate] = useState<string>('');
   const [paymentItems, setPaymentItems] = useState<PaymentItem[]>([]);
   const [includeKeysInPercent, setIncludeKeysInPercent] = useState<boolean>(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState<boolean>(false);
 
   // Estado do Accordion (Proposta vs Pagamento vs Itens - 1 aberto por vez)
   const [activeSection, setActiveSection] = useState<'proposta' | 'pagamento' | 'itens' | null>('proposta');
@@ -37,12 +40,20 @@ export const CalculatorMain: React.FC = () => {
     setActiveSection('proposta');
   };
 
-  const handleGeneratePDF = () => {
-    // Abrir a aba de lançamentos para incluir no PDF
-    setActiveSection('itens');
-    setTimeout(() => {
-      window.print();
-    }, 150);
+  const handleGeneratePDF = async () => {
+    try {
+      setIsGeneratingPDF(true);
+      await generateProposalPDF({
+        totalProposal,
+        keyDeliveryDate,
+        paymentItems,
+        result,
+      });
+    } catch (err) {
+      console.error('Erro ao gerar PDF:', err);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   return (
@@ -73,8 +84,9 @@ export const CalculatorMain: React.FC = () => {
           className="btn btn-primary btn-sm"
           style={{ fontSize: '0.8rem' }}
           title="Gerar PDF da Proposta e Fluxo"
+          disabled={isGeneratingPDF}
         >
-          GERAR PDF
+          {isGeneratingPDF ? 'GERANDO PDF...' : 'GERAR PDF'}
         </button>
       </div>
 
