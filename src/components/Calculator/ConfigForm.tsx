@@ -50,7 +50,7 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Building2 size={20} style={{ color: 'var(--color-primary)' }} />
           <h2 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-            PROPOSTA
+            PREÇO E DATA DE ENTREGA
           </h2>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
