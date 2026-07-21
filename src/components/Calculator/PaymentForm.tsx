@@ -78,7 +78,13 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 
   // Quando o usuário digita o percentual (%)
   const handlePercentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
+    let raw = e.target.value.replace('%', '').replace(',', '.').trim();
+    raw = raw.replace(/[^\d.]/g, '');
+    const parts = raw.split('.');
+    if (parts.length > 2) {
+      raw = parts[0] + '.' + parts.slice(1).join('');
+    }
+
     setPercentStr(raw);
 
     const p = parseFloat(raw);
@@ -311,24 +317,16 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 
             {/* Valor % e Valor R$ em paralelo */}
             <div className="grid-2">
-              {/* Campo % do imóvel */}
+              {/* Campo % do imóvel com máscara */}
               <div className="form-group">
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <input
-                    type="number"
-                    step="any"
-                    min="0"
-                    max="100"
-                    className="form-input"
-                    value={percentStr}
-                    onChange={handlePercentChange}
-                    placeholder="Percentual (%)"
-                    style={{ fontWeight: 600, paddingRight: '2rem' }}
-                  />
-                  <span style={{ position: 'absolute', right: '1rem', color: 'var(--text-muted)', fontWeight: 600, pointerEvents: 'none' }}>
-                    %
-                  </span>
-                </div>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={percentStr ? `${percentStr}%` : ''}
+                  onChange={handlePercentChange}
+                  placeholder="Percentual (0%)"
+                  style={{ fontWeight: 600 }}
+                />
               </div>
 
               {/* Campo R$ (por parcela ou total) */}
