@@ -1,7 +1,7 @@
 import React from 'react';
-import type { PaymentItem, PaymentCategory, EntryType } from '../../utils/calculatorEngine';
+import type { PaymentItem, PaymentCategory } from '../../utils/calculatorEngine';
 import { formatBRL, formatDateBR } from '../../utils/formatters';
-import { Trash2, Coins, Key, Car, Building2, Wrench, CalendarDays, FileText, ChevronDown, ChevronUp, ListOrdered } from 'lucide-react';
+import { Trash2, FileText, ChevronDown, ChevronUp, ListOrdered } from 'lucide-react';
 
 interface ConfiguredItemsListProps {
   paymentItems: PaymentItem[];
@@ -22,28 +22,41 @@ export const ConfiguredItemsList: React.FC<ConfiguredItemsListProps> = ({
     setPaymentItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const getCategoryIcon = (cat: PaymentCategory, type?: EntryType) => {
-    switch (cat) {
-      case 'sinal':
-        return <Coins size={18} style={{ color: '#bcbcbc' }} />;
-      case 'entrada':
-        if (type === 'imovel') return <Building2 size={18} style={{ color: '#3b82f6' }} />;
-        if (type === 'veiculo') return <Car size={18} style={{ color: '#10b981' }} />;
-        if (type === 'servico') return <Wrench size={18} style={{ color: '#ec4899' }} />;
-        return <Coins size={18} style={{ color: '#6366f1' }} />;
-      case 'parcela_intermediaria':
-        return <CalendarDays size={18} style={{ color: '#a855f7' }} />;
-      case 'chaves':
-        return <Key size={18} style={{ color: '#14b8a6' }} />;
-    }
-  };
-
   const getCategoryLabel = (cat: PaymentCategory) => {
     switch (cat) {
       case 'sinal': return 'Sinal';
       case 'entrada': return 'Entrada';
       case 'parcela_intermediaria': return 'Intermediárias';
       case 'chaves': return 'Chaves';
+    }
+  };
+
+  const getCategoryBadgeStyle = (cat: PaymentCategory) => {
+    switch (cat) {
+      case 'sinal':
+        return {
+          color: 'var(--text-secondary)', // #BCBCBC
+          background: 'rgba(188, 188, 188, 0.12)',
+          border: '1px solid rgba(188, 188, 188, 0.25)',
+        };
+      case 'entrada':
+        return {
+          color: 'var(--color-primary)', // #D6FF00
+          background: 'rgba(214, 255, 0, 0.12)',
+          border: '1px solid rgba(214, 255, 0, 0.25)',
+        };
+      case 'parcela_intermediaria':
+        return {
+          color: '#ffffff', // #FFFFFF
+          background: 'rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+        };
+      case 'chaves':
+        return {
+          color: 'var(--color-primary)', // #D6FF00
+          background: 'rgba(214, 255, 0, 0.12)',
+          border: '1px solid rgba(214, 255, 0, 0.25)',
+        };
     }
   };
 
@@ -95,31 +108,31 @@ export const ConfiguredItemsList: React.FC<ConfiguredItemsListProps> = ({
               {paymentItems.map((item) => {
                 const itemTotal = item.value * item.installmentsCount;
                 const itemPercent = totalProposal > 0 ? (itemTotal / totalProposal) * 100 : 0;
+                const badgeStyle = getCategoryBadgeStyle(item.category);
+
                 return (
                   <div 
                     key={item.id} 
                     className="payment-list-item"
                   >
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                      <div style={{ 
-                        width: '40px', 
-                        height: '40px', 
-                        borderRadius: 'var(--radius-sm)', 
-                        background: 'var(--bg-tertiary)', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center' 
+                      {/* Badge da Categoria no Começo da Linha */}
+                      <span style={{ 
+                        fontSize: '0.7rem', 
+                        fontWeight: 700, 
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        padding: '0.25rem 0.6rem', 
+                        borderRadius: 'var(--radius-sm)',
+                        whiteSpace: 'nowrap',
+                        ...badgeStyle
                       }}>
-                        {getCategoryIcon(item.category, item.entryType)}
-                      </div>
+                        {getCategoryLabel(item.category)}
+                      </span>
+
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                            {item.description}
-                          </span>
-                          <span className="badge badge-info" style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem' }}>
-                            {getCategoryLabel(item.category)}
-                          </span>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {item.description}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                           {item.installmentsCount > 1 ? (
