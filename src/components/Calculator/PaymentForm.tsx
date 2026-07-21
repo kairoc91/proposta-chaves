@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { PaymentItem, PaymentCategory, EntryType, RecurrenceType } from '../../utils/calculatorEngine';
 import { formatBRL, parseBRLString, formatDateBR } from '../../utils/formatters';
-import { Plus, Coins, Key, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Coins, Key, CalendarDays, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 
 interface PaymentFormProps {
   paymentItems: PaymentItem[];
@@ -137,6 +137,10 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     // Validação
     const newErrors: Record<string, string> = {};
     const numericValue = parseBRLString(valueStr);
+
+    if (totalProposal <= 0 || !keyDeliveryDate) {
+      newErrors.config = 'É obrigatório informar o Preço da Proposta e a Data de Entrega no primeiro painel antes de lançar pagamentos.';
+    }
     
     if (numericValue <= 0) {
       newErrors.value = 'Informe um valor ou percentual maior que 0';
@@ -239,6 +243,21 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
       {/* Conteúdo Expansível (Formulário de Criação) */}
       {isExpanded && (
         <div style={{ padding: '1.5rem', borderTop: '1px solid var(--card-border)' }}>
+          
+          {/* Banner de Aviso de Obrigatoriedade */}
+          {(!totalProposal || !keyDeliveryDate) && (
+            <div style={{ fontSize: '0.85rem', color: 'var(--color-primary)', background: 'rgba(214, 255, 0, 0.08)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(214, 255, 0, 0.25)', display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
+              <AlertCircle size={18} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
+              <span>Atenção: É obrigatório informar o <strong>Preço da Proposta</strong> e a <strong>Data de Entrega</strong> no painel de topo para lançar pagamentos.</span>
+            </div>
+          )}
+
+          {errors.config && (
+            <div className="form-error" style={{ fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 600 }}>
+              {errors.config}
+            </div>
+          )}
+
           <form onSubmit={handleAddItem} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             
             {/* Categoria */}
