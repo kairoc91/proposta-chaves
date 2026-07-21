@@ -6,7 +6,6 @@ import { DashboardCards } from './DashboardCards';
 import { PaymentForm } from './PaymentForm';
 import { ConfiguredItemsList } from './ConfiguredItemsList';
 
-import { Printer } from 'lucide-react';
 
 export const CalculatorMain: React.FC = () => {
   // Inicialização com valores zerados
@@ -75,7 +74,6 @@ export const CalculatorMain: React.FC = () => {
           style={{ fontSize: '0.8rem' }}
           title="Gerar PDF da Proposta e Fluxo"
         >
-          <Printer size={16} />
           GERAR PDF
         </button>
       </div>
