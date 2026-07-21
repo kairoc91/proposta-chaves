@@ -106,7 +106,7 @@ export async function generateProposalPDF({
             <th style="padding: 10px 12px; text-align: center; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151; width: 65px;">Qtd</th>
             <th style="padding: 10px 12px; text-align: center; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151; width: 90px;">Vencimento</th>
             <th style="padding: 10px 12px; text-align: right; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151; width: 110px;">Valor Unit.</th>
-            <th style="padding: 10px 12px; text-align: right; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151; width: 110px;">Total</th>
+            <th style="padding: 10px 12px; text-align: right; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151; width: 110px;">Subtotal</th>
             <th style="padding: 10px 12px; text-align: right; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #047857; width: 65px;">% Prop.</th>
           </tr>
         </thead>
