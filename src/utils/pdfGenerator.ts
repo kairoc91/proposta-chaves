@@ -119,6 +119,28 @@ export async function generateProposalPDF({
                   const itemPercent = totalProposal > 0 ? (itemTotal / totalProposal) * 100 : 0;
                   const isEven = idx % 2 === 1;
 
+                  const getPDFItemDescription = (item: PaymentItem): string => {
+                    switch (item.category) {
+                      case 'sinal':
+                        return '-';
+                      case 'entrada':
+                        return item.installmentsCount > 1 ? 'Parcelada' : 'À vista';
+                      case 'parcela_intermediaria': {
+                        const recLabels: Record<string, string> = {
+                          mensal: 'Mensal',
+                          trimestral: 'Trimestral',
+                          semestral: 'Semestral',
+                          anual: 'Anual',
+                        };
+                        return item.recurrence ? recLabels[item.recurrence] || '-' : '-';
+                      }
+                      case 'chaves':
+                        return '-';
+                      default:
+                        return '-';
+                    }
+                  };
+
                   return `
                     <tr style="background-color: ${isEven ? '#f9fafb' : '#ffffff'}; border-bottom: 1px solid #e5e7eb;">
                       <td style="padding: 10px 12px; text-align: center; font-size: 11px; color: #6b7280; font-weight: 600;">${idx + 1}</td>
@@ -127,7 +149,7 @@ export async function generateProposalPDF({
                           ${getCategoryLabel(item.category)}
                         </span>
                       </td>
-                      <td style="padding: 10px 12px; font-size: 12px; font-weight: 600; color: #111827;">${item.description}</td>
+                      <td style="padding: 10px 12px; font-size: 12px; font-weight: 600; color: #111827;">${getPDFItemDescription(item)}</td>
                       <td style="padding: 10px 12px; text-align: center; font-size: 11px; color: #4b5563;">${item.installmentsCount > 1 ? `${item.installmentsCount}x` : '1x'}</td>
                       <td style="padding: 10px 12px; text-align: center; font-size: 11px; color: #4b5563;">${formatDateBR(item.startDate)}</td>
                       <td style="padding: 10px 12px; text-align: right; font-size: 11px; font-weight: 600; color: #4b5563;">${formatBRL(item.value)}</td>
