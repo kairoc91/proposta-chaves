@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { PaymentItem, PaymentCategory, EntryType, RecurrenceType } from '../../utils/calculatorEngine';
 import { formatBRL, parseBRLString, formatDateBR } from '../../utils/formatters';
-import { Plus, Coins, Key, CalendarDays, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { Plus, Key, CalendarDays, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 
 interface PaymentFormProps {
   paymentItems: PaymentItem[];
@@ -204,6 +204,8 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 
   const isBlocked = !totalProposal || !keyDeliveryDate;
 
+  const isSectionFilled = launchedPercent >= 99.99;
+
   return (
     <div className="glass-card animate-fade-in" style={{ padding: '0', marginBottom: '1.5rem', overflow: 'hidden' }}>
       {/* Cabeçalho Clicável do Accordion */}
@@ -221,7 +223,16 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Coins size={20} style={{ color: 'var(--color-primary)' }} />
+          <span style={{ 
+            width: '10px', 
+            height: '10px', 
+            borderRadius: '50%', 
+            backgroundColor: isSectionFilled ? 'var(--color-primary)' : 'var(--text-secondary)', 
+            boxShadow: isSectionFilled ? '0 0 10px var(--color-primary-glow), 0 0 4px var(--color-primary)' : 'none',
+            display: 'inline-block',
+            flexShrink: 0,
+            transition: 'all 0.3s ease'
+          }} />
           <h2 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
             PAGAMENTOS
           </h2>

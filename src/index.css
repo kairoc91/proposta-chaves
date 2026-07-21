@@ -490,4 +490,23 @@ h1, h2, h3 {
   text-transform: uppercase;
 }
 
+/* Print / PDF Export Styles */
+@media print {
+  body {
+    background: #121212 !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .btn, button, .no-print {
+    display: none !important;
+  }
+
+  .glass-card {
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background: #1a1a1a !important;
+  }
+}
+
 

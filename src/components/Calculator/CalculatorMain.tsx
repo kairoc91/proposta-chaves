@@ -6,6 +6,8 @@ import { DashboardCards } from './DashboardCards';
 import { PaymentForm } from './PaymentForm';
 import { ConfiguredItemsList } from './ConfiguredItemsList';
 
+import { Printer } from 'lucide-react';
+
 export const CalculatorMain: React.FC = () => {
   // Inicialização com valores zerados
   const [totalProposal, setTotalProposal] = useState<number>(0);
@@ -36,6 +38,14 @@ export const CalculatorMain: React.FC = () => {
     setActiveSection('proposta');
   };
 
+  const handleGeneratePDF = () => {
+    // Abrir a aba de lançamentos para incluir no PDF
+    setActiveSection('itens');
+    setTimeout(() => {
+      window.print();
+    }, 150);
+  };
+
   return (
     <main className="container" style={{ paddingBottom: '5rem' }}>
       
@@ -47,7 +57,7 @@ export const CalculatorMain: React.FC = () => {
       />
 
       {/* Top Actions Row */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1.25rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
         {/* Reset button */}
         <button 
           onClick={handleResetValues}
@@ -56,6 +66,17 @@ export const CalculatorMain: React.FC = () => {
           title="Zerar todos os campos e fluxos"
         >
           RESETAR VALORES
+        </button>
+
+        {/* Gerar PDF button */}
+        <button 
+          onClick={handleGeneratePDF}
+          className="btn btn-primary btn-sm"
+          style={{ fontSize: '0.8rem' }}
+          title="Gerar PDF da Proposta e Fluxo"
+        >
+          <Printer size={16} />
+          GERAR PDF
         </button>
       </div>
 

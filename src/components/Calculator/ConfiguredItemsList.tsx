@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PaymentItem, PaymentCategory } from '../../utils/calculatorEngine';
 import { formatBRL, formatDateBR } from '../../utils/formatters';
-import { Trash2, FileText, ChevronDown, ChevronUp, ListOrdered } from 'lucide-react';
+import { Trash2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ConfiguredItemsListProps {
   paymentItems: PaymentItem[];
@@ -60,6 +60,8 @@ export const ConfiguredItemsList: React.FC<ConfiguredItemsListProps> = ({
     }
   };
 
+  const isSectionFilled = paymentItems.length > 0;
+
   return (
     <div className="glass-card animate-fade-in" style={{ padding: '0', marginBottom: '1.5rem', overflow: 'hidden' }}>
       {/* Cabeçalho Clicável do Accordion */}
@@ -77,7 +79,16 @@ export const ConfiguredItemsList: React.FC<ConfiguredItemsListProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <ListOrdered size={20} style={{ color: 'var(--color-primary)' }} />
+          <span style={{ 
+            width: '10px', 
+            height: '10px', 
+            borderRadius: '50%', 
+            backgroundColor: isSectionFilled ? 'var(--color-primary)' : 'var(--text-secondary)', 
+            boxShadow: isSectionFilled ? '0 0 10px var(--color-primary-glow), 0 0 4px var(--color-primary)' : 'none',
+            display: 'inline-block',
+            flexShrink: 0,
+            transition: 'all 0.3s ease'
+          }} />
           <h2 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
             LANÇAMENTOS
           </h2>

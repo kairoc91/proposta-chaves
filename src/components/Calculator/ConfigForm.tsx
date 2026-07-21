@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatBRL, parseBRLString } from '../../utils/formatters';
-import { Calendar, ChevronDown, ChevronUp, Building2 } from 'lucide-react';
+import { Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ConfigFormProps {
   totalProposal: number;
@@ -31,6 +31,8 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
 
   const formattedProposal = totalProposal > 0 ? formatBRL(totalProposal) : '';
 
+  const isSectionFilled = totalProposal > 0 && Boolean(keyDeliveryDate);
+
   return (
     <div className="glass-card animate-fade-in" style={{ padding: '0', marginBottom: '1.5rem', overflow: 'hidden' }}>
       {/* Cabeçalho Clicável do Accordion */}
@@ -48,7 +50,16 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Building2 size={20} style={{ color: 'var(--color-primary)' }} />
+          <span style={{ 
+            width: '10px', 
+            height: '10px', 
+            borderRadius: '50%', 
+            backgroundColor: isSectionFilled ? 'var(--color-primary)' : 'var(--text-secondary)', 
+            boxShadow: isSectionFilled ? '0 0 10px var(--color-primary-glow), 0 0 4px var(--color-primary)' : 'none',
+            display: 'inline-block',
+            flexShrink: 0,
+            transition: 'all 0.3s ease'
+          }} />
           <h2 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
             PREÇO E DATA DE ENTREGA
           </h2>
