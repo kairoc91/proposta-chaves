@@ -42,12 +42,12 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     } else if (category === 'entrada') {
       const entryLabels: Record<EntryType, string> = {
         dinheiro: 'Dinheiro',
-        imovel: 'Dação - Imóvel',
-        veiculo: 'Dação - Veículo',
-        servico: 'Dação - Serviço',
-        outros: 'Dação - Outro Bem',
+        imovel: 'Imóvel',
+        veiculo: 'Veículo',
+        servico: 'Serviço',
+        outros: 'Outro',
       };
-      setDescription(`Entrada em ${entryLabels[entryType]}`);
+      setDescription(`Entrada - ${entryLabels[entryType]}`);
     } else if (category === 'parcela_intermediaria') {
       const recLabels: Record<RecurrenceType, string> = {
         mensal: 'Mensal',
@@ -300,11 +300,11 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                   onChange={(e) => setEntryType(e.target.value as EntryType)}
                   disabled={isBlocked}
                 >
-                  <option value="dinheiro">Entrada em Dinheiro (TED/Pix)</option>
-                  <option value="imovel">Entrada via Dação de Imóvel</option>
-                  <option value="veiculo">Entrada via Dação de Veículo</option>
-                  <option value="servico">Entrada via Dação de Serviço</option>
-                  <option value="outros">Entrada via Dação de Outro Bem</option>
+                  <option value="dinheiro">Dinheiro</option>
+                  <option value="imovel">Imóvel</option>
+                  <option value="veiculo">Veículo</option>
+                  <option value="servico">Serviço</option>
+                  <option value="outros">Outro</option>
                 </select>
               </div>
             )}
