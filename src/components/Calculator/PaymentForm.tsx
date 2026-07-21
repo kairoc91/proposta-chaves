@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { PaymentItem, PaymentCategory, EntryType, RecurrenceType } from '../../utils/calculatorEngine';
 import { formatBRL, parseBRLString, formatDateBR } from '../../utils/formatters';
 import { Plus, Key, CalendarDays, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
@@ -32,8 +32,61 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
   const [installmentsCount, setInstallmentsCount] = useState<number>(1);
   const [startDate, setStartDate] = useState('');
 
+  // Ref para controle inteligente de cursor
+  const percentInputRef = useRef<HTMLInputElement>(null);
+
   // Estados de erro/validação
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Posiciona o cursor sempre antes do símbolo de '%'
+  const setCursorBeforePercent = () => {
+    if (!percentInputRef.current) return;
+    const val = percentInputRef.current.value;
+    const percentIdx = val.indexOf('%');
+    if (percentIdx !== -1) {
+      setTimeout(() => {
+        try {
+          percentInputRef.current?.setSelectionRange(percentIdx, percentIdx);
+        } catch {}
+      }, 0);
+    }
+  };
+
+  // Quando o usuário digita ou apaga no campo de percentual (%)
+  const handlePercentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let raw = e.target.value;
+
+    // Se o '%' foi apagado (ex: toque/clique no final do campo em mobile), remove o último número
+    if (percentStr && !raw.includes('%') && raw.length <= percentStr.length) {
+      raw = percentStr.slice(0, -1);
+    } else {
+      raw = raw.replace('%', '').replace(',', '.').trim();
+    }
+
+    raw = raw.replace(/[^\d.]/g, '');
+    const parts = raw.split('.');
+    if (parts.length > 2) {
+      raw = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    setPercentStr(raw);
+
+    const p = parseFloat(raw);
+    if (isNaN(p) || p <= 0) {
+      setValueStr('');
+      setCursorBeforePercent();
+      return;
+    }
+
+    if (totalProposal > 0) {
+      const count = category === 'parcela_intermediaria' ? Math.max(1, installmentsCount) : 1;
+      const totalGroupVal = (p / 100) * totalProposal;
+      const valPerInst = totalGroupVal / count;
+      setValueStr(formatBRL(valPerInst));
+    }
+
+    setCursorBeforePercent();
+  };
 
   // Atualizar descrição padrão com base na categoria e configurações
   useEffect(() => {
@@ -76,30 +129,6 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     }
   };
 
-  // Quando o usuário digita o percentual (%)
-  const handlePercentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let raw = e.target.value.replace('%', '').replace(',', '.').trim();
-    raw = raw.replace(/[^\d.]/g, '');
-    const parts = raw.split('.');
-    if (parts.length > 2) {
-      raw = parts[0] + '.' + parts.slice(1).join('');
-    }
-
-    setPercentStr(raw);
-
-    const p = parseFloat(raw);
-    if (isNaN(p) || p <= 0) {
-      setValueStr('');
-      return;
-    }
-
-    if (totalProposal > 0) {
-      const count = category === 'parcela_intermediaria' ? Math.max(1, installmentsCount) : 1;
-      const totalGroupVal = (p / 100) * totalProposal;
-      const valPerInst = totalGroupVal / count;
-      setValueStr(formatBRL(valPerInst));
-    }
-  };
 
   // Quando o usuário digita o valor em R$
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -370,10 +399,14 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
               {/* Campo % do imóvel com máscara */}
               <div className="form-group">
                 <input
+                  ref={percentInputRef}
                   type="text"
                   className="form-input"
                   value={percentStr ? `${percentStr}%` : ''}
                   onChange={handlePercentChange}
+                  onFocus={setCursorBeforePercent}
+                  onClick={setCursorBeforePercent}
+                  onKeyUp={setCursorBeforePercent}
                   placeholder="Percentual (0%)"
                   style={{ fontWeight: 600 }}
                   disabled={isBlocked}
