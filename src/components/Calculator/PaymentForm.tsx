@@ -340,8 +340,8 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                     value={valueStr}
                     onChange={handleValueChange}
                     placeholder={category === 'parcela_intermediaria'
-                      ? 'Valor parcela (R$ 0,00)' 
-                      : 'Valor (R$ 0,00)'}
+                      ? 'Valor parcela (R$ 0)' 
+                      : 'Valor (R$ 0)'}
                     style={{ fontWeight: 600 }}
                   />
                 </div>

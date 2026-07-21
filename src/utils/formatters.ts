@@ -2,21 +2,23 @@ import { parseISO, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 /**
- * Formata um número para o padrão de moeda brasileiro (BRL).
+ * Formata um número para o padrão de moeda brasileiro (BRL) sem casas decimais (centavos).
  */
 export function formatBRL(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(value);
 }
 
 /**
- * Converte uma string formatada em moeda BRL para número decimal.
+ * Converte uma string formatada em moeda BRL para número inteiro de reais (sem centavos).
  */
 export function parseBRLString(value: string): number {
   const digits = value.replace(/\D/g, '');
-  return digits ? Number(digits) / 100 : 0;
+  return digits ? parseInt(digits, 10) : 0;
 }
 
 /**

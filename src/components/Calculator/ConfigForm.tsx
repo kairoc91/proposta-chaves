@@ -76,7 +76,7 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
                   className="form-input"
                   value={formattedProposal}
                   onChange={handleProposalChange}
-                  placeholder="Valor Total da Proposta (R$ 0,00)"
+                  placeholder="Valor Total da Proposta (R$ 0)"
                   style={{ fontWeight: 600, color: 'var(--text-primary)' }}
                 />
               </div>
