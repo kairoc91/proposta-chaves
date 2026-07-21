@@ -202,6 +202,8 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     return Number.isInteger(rounded) ? `${rounded}%` : `${rounded.toFixed(2)}%`;
   };
 
+  const isBlocked = !totalProposal || !keyDeliveryDate;
+
   return (
     <div className="glass-card animate-fade-in" style={{ padding: '0', marginBottom: '1.5rem', overflow: 'hidden' }}>
       {/* Cabeçalho Clicável do Accordion */}
@@ -244,11 +246,25 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
       {isExpanded && (
         <div style={{ padding: '1.5rem', borderTop: '1px solid var(--card-border)' }}>
           
-          {/* Banner de Aviso de Obrigatoriedade */}
-          {(!totalProposal || !keyDeliveryDate) && (
-            <div style={{ fontSize: '0.85rem', color: 'var(--color-primary)', background: 'rgba(214, 255, 0, 0.08)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(214, 255, 0, 0.25)', display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
-              <AlertCircle size={18} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
-              <span>Atenção: É obrigatório informar o <strong>Preço da Proposta</strong> e a <strong>Data de Entrega</strong> no painel de topo para lançar pagamentos.</span>
+          {/* Banner de Aviso de Obrigatoriedade (Laranja) */}
+          {isBlocked && (
+            <div style={{ 
+              fontSize: '0.85rem', 
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              color: '#f59e0b', 
+              background: 'rgba(245, 158, 11, 0.12)', 
+              padding: '0.85rem 1.1rem', 
+              borderRadius: 'var(--radius-sm)', 
+              border: '1px solid rgba(245, 158, 11, 0.35)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.6rem', 
+              marginBottom: '1.25rem' 
+            }}>
+              <AlertCircle size={20} style={{ color: '#f59e0b', flexShrink: 0 }} />
+              <span>PREENCHA O PREÇO E DATA DE ENTREGA</span>
             </div>
           )}
 
@@ -258,7 +274,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
             </div>
           )}
 
-          <form onSubmit={handleAddItem} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <form onSubmit={handleAddItem} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', opacity: isBlocked ? 0.6 : 1 }}>
             
             {/* Categoria */}
             <div className="form-group">
@@ -266,6 +282,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                 className="form-select" 
                 value={category} 
                 onChange={(e) => setCategory(e.target.value as PaymentCategory)}
+                disabled={isBlocked}
               >
                 <option value="sinal">Sinal</option>
                 <option value="entrada">Entrada</option>
@@ -281,6 +298,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                   className="form-select" 
                   value={entryType} 
                   onChange={(e) => setEntryType(e.target.value as EntryType)}
+                  disabled={isBlocked}
                 >
                   <option value="dinheiro">Entrada em Dinheiro (TED/Pix)</option>
                   <option value="imovel">Entrada via Dação de Imóvel</option>
@@ -309,6 +327,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                     className="form-select" 
                     value={recurrence} 
                     onChange={(e) => setRecurrence(e.target.value as RecurrenceType)}
+                    disabled={isBlocked}
                   >
                     <option value="mensal">Mensal</option>
                     <option value="trimestral">Trimestral</option>
@@ -328,6 +347,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                       handleInstallmentsChange(isNaN(val) ? 0 : val);
                     }}
                     placeholder="Parcelas (1 a 140)"
+                    disabled={isBlocked}
                   />
                   {errors.installmentsCount && <span className="form-error">{errors.installmentsCount}</span>}
                 </div>
@@ -345,6 +365,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                   onChange={handlePercentChange}
                   placeholder="Percentual (0%)"
                   style={{ fontWeight: 600 }}
+                  disabled={isBlocked}
                 />
               </div>
 
@@ -360,6 +381,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                       ? 'Valor parcela (R$ 0)' 
                       : 'Valor (R$ 0)'}
                     style={{ fontWeight: 600 }}
+                    disabled={isBlocked}
                   />
                 </div>
                 {errors.value && <span className="form-error">{errors.value}</span>}
@@ -405,8 +427,9 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                         (e.target as HTMLInputElement).showPicker?.();
                       } catch {}
                     }}
-                    style={{ paddingLeft: '2.5rem', cursor: 'pointer' }}
+                    style={{ paddingLeft: '2.5rem', cursor: isBlocked ? 'not-allowed' : 'pointer' }}
                     required
+                    disabled={isBlocked}
                   />
                 </div>
                 {errors.startDate && <span className="form-error">{errors.startDate}</span>}
@@ -414,7 +437,12 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
             )}
 
             {/* Botão de Submeter */}
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>
+            <button 
+              type="submit" 
+              className="btn btn-primary" 
+              style={{ marginTop: '0.5rem', opacity: isBlocked ? 0.5 : 1, cursor: isBlocked ? 'not-allowed' : 'pointer' }}
+              disabled={isBlocked}
+            >
               <Plus size={18} />
               ADICIONAR ITEM
             </button>
