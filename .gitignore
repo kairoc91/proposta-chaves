@@ -7,18 +7,45 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies and Build Outputs
 node_modules
 dist
 dist-ssr
+.pnpm-store
+.next
+.turbo
 *.local
 
-# Editor directories and files
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# OS system files (macOS, Windows, Linux)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor and IDE directories
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.tmp
+*.bak
+
+# Coverage and testing
+coverage
+.nyc_output
+
+# AI and Local Agent cache
+.gemini
+.agents
