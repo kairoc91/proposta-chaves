@@ -97,7 +97,7 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({
         position: 'sticky', 
         top: 0, 
         zIndex: 100, 
-        background: 'rgba(18, 18, 18, 0.9)', 
+        background: 'var(--bg-sticky)', 
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderBottom: '1px solid var(--card-border)',

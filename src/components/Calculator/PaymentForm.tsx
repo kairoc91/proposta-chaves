@@ -1,328 +1,232 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { PaymentItem, PaymentCategory, EntryType, RecurrenceType } from '../../utils/calculatorEngine';
 import { formatBRL, parseBRLString, formatDateBR } from '../../utils/formatters';
-import { Plus, Key, CalendarDays, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, CalendarDays, Key, AlertCircle, Wallet } from 'lucide-react';
 
 interface PaymentFormProps {
   paymentItems: PaymentItem[];
   setPaymentItems: React.Dispatch<React.SetStateAction<PaymentItem[]>>;
   keyDeliveryDate: string;
   totalProposal: number;
-  isExpanded: boolean;
-  onToggle: () => void;
-  onItemAdded?: () => void;
 }
 
-export const PaymentForm: React.FC<PaymentFormProps> = ({
-  paymentItems,
-  setPaymentItems,
-  keyDeliveryDate,
-  totalProposal,
-  isExpanded,
-  onToggle,
-  onItemAdded,
-}) => {
-  // Estado do formulário de criação
-  const [category, setCategory] = useState<PaymentCategory>('sinal');
-  const [description, setDescription] = useState('');
-  const [valueStr, setValueStr] = useState('');
-  const [percentStr, setPercentStr] = useState('');
-  const [entryType, setEntryType] = useState<EntryType>('dinheiro');
-  const [recurrence, setRecurrence] = useState<RecurrenceType>('mensal');
-  const [installmentsCount, setInstallmentsCount] = useState<number>(1);
-  const [startDate, setStartDate] = useState('');
+interface PaymentRowItemProps {
+  item: PaymentItem;
+  totalProposal: number;
+  keyDeliveryDate: string;
+  isBlocked: boolean;
+  onUpdateItem: (updatedItem: PaymentItem) => void;
+  onRemoveItem: (id: string) => void;
+}
 
-  // Ref para controle inteligente de cursor
+const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
+  item,
+  totalProposal,
+  keyDeliveryDate,
+  isBlocked,
+  onUpdateItem,
+  onRemoveItem,
+}) => {
+  const [valueStr, setValueStr] = useState(item.value > 0 ? formatBRL(item.value) : '');
+  const [percentStr, setPercentStr] = useState('');
+  const [installmentsCount, setInstallmentsCount] = useState(item.installmentsCount || 1);
+  const [startDate, setStartDate] = useState(item.startDate || '');
+  const [recurrence, setRecurrence] = useState<RecurrenceType>(item.recurrence || 'mensal');
+  const [entryType, setEntryType] = useState<EntryType>(item.entryType || 'dinheiro');
+
   const percentInputRef = useRef<HTMLInputElement>(null);
 
-  // Estados de erro/validação
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Posiciona o cursor sempre antes do símbolo de '%'
   const setCursorBeforePercent = () => {
-    if (!percentInputRef.current) return;
-    const val = percentInputRef.current.value;
-    const percentIdx = val.indexOf('%');
-    if (percentIdx !== -1) {
-      setTimeout(() => {
-        try {
-          percentInputRef.current?.setSelectionRange(percentIdx, percentIdx);
-        } catch {}
-      }, 0);
-    }
+    setTimeout(() => {
+      if (percentInputRef.current) {
+        const val = percentInputRef.current.value;
+        const percentIdx = val.indexOf('%');
+        if (percentIdx !== -1) {
+          percentInputRef.current.setSelectionRange(percentIdx, percentIdx);
+        } else {
+          percentInputRef.current.setSelectionRange(val.length, val.length);
+        }
+      }
+    }, 0);
   };
 
-  // Quando o usuário digita ou apaga no campo de percentual (%)
-  const handlePercentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let raw = e.target.value;
-
-    // Se o '%' foi apagado (ex: toque/clique no final do campo em mobile), remove o último número
-    if (percentStr && !raw.includes('%') && raw.length <= percentStr.length) {
-      raw = percentStr.slice(0, -1);
-    } else {
-      raw = raw.replace('%', '').replace(',', '.').trim();
-    }
-
-    raw = raw.replace(/[^\d.]/g, '');
-    const parts = raw.split('.');
-    if (parts.length > 2) {
-      raw = parts[0] + '.' + parts.slice(1).join('');
-    }
-
-    setPercentStr(raw);
-
-    const p = parseFloat(raw);
-    if (isNaN(p) || p <= 0) {
-      setValueStr('');
-      setCursorBeforePercent();
-      return;
-    }
+  // Sincronizar percentual local quando item ou totalProposal mudar
+  useEffect(() => {
+    setValueStr(item.value > 0 ? formatBRL(item.value) : '');
+    setInstallmentsCount(item.installmentsCount || 1);
+    setStartDate(item.startDate || '');
+    if (item.recurrence) setRecurrence(item.recurrence);
+    if (item.entryType) setEntryType(item.entryType);
 
     if (totalProposal > 0) {
-      const count = category === 'parcela_intermediaria' ? Math.max(1, installmentsCount) : 1;
-      const totalGroupVal = (p / 100) * totalProposal;
-      const valPerInst = totalGroupVal / count;
-      setValueStr(formatBRL(valPerInst));
+      const count = item.category === 'parcela_intermediaria' ? Math.max(1, item.installmentsCount) : 1;
+      const totalGroupVal = item.value * count;
+      const p = (totalGroupVal / totalProposal) * 100;
+      const rounded = Math.round(p * 100) / 100;
+      setPercentStr(rounded > 0 ? String(rounded) : '');
+    } else {
+      setPercentStr('');
     }
+  }, [item.value, item.installmentsCount, item.startDate, item.recurrence, item.entryType, totalProposal]);
 
-    setCursorBeforePercent();
-  };
+  const handleCategoryChange = (newCat: PaymentCategory) => {
+    let newDesc = item.description;
+    let newEntryType = item.entryType;
+    let newRecurrence = item.recurrence;
+    let newCount = item.installmentsCount;
 
-  // Atualizar descrição padrão com base na categoria e configurações
-  useEffect(() => {
-    if (category === 'sinal') {
-      setDescription('Sinal de Reserva');
-    } else if (category === 'entrada') {
+    if (newCat === 'sinal') {
+      newDesc = 'Sinal de Reserva';
+      newCount = 1;
+    } else if (newCat === 'entrada') {
       const entryLabels: Record<EntryType, string> = {
-        dinheiro: 'Dinheiro',
-        imovel: 'Imóvel',
-        veiculo: 'Veículo',
-        servico: 'Serviço',
-        outros: 'Outro',
+        dinheiro: 'Dinheiro', imovel: 'Imóvel', veiculo: 'Veículo', servico: 'Serviço', outros: 'Outro'
       };
-      setDescription(`Entrada - ${entryLabels[entryType]}`);
-    } else if (category === 'parcela_intermediaria') {
+      newEntryType = newEntryType || 'dinheiro';
+      newDesc = `Entrada - ${entryLabels[newEntryType]}`;
+      newCount = 1;
+    } else if (newCat === 'parcela_intermediaria') {
       const recLabels: Record<RecurrenceType, string> = {
-        mensal: 'Mensal',
-        trimestral: 'Trimestral',
-        semestral: 'Semestral',
-        anual: 'Anual',
+        mensal: 'Mensal', trimestral: 'Trimestral', semestral: 'Semestral', anual: 'Anual'
       };
-      setDescription(`Intermediárias ${recLabels[recurrence]}s`);
-    } else if (category === 'chaves') {
-      setDescription('Saldo de Chaves (À Vista)');
-      setInstallmentsCount(1);
+      newRecurrence = newRecurrence || 'mensal';
+      newDesc = `Intermediárias ${recLabels[newRecurrence]}s`;
+      newCount = Math.max(1, installmentsCount);
+    } else if (newCat === 'chaves') {
+      newDesc = 'Saldo de Chaves (À Vista)';
+      newCount = 1;
     }
-  }, [category, entryType, recurrence]);
 
-  // Recalcular R$ ou % ao alterar quantidade de parcelas se o % estiver preenchido
-  const handleInstallmentsChange = (countVal: number) => {
-    setInstallmentsCount(countVal);
-    if (percentStr && totalProposal > 0) {
-      const p = parseFloat(percentStr);
-      if (!isNaN(p) && p > 0) {
-        const count = category === 'parcela_intermediaria' ? Math.max(1, countVal) : 1;
-        const totalGroupVal = (p / 100) * totalProposal;
-        const valPerInst = totalGroupVal / count;
-        setValueStr(formatBRL(valPerInst));
-      }
-    }
+    onUpdateItem({
+      ...item,
+      category: newCat,
+      description: newDesc,
+      entryType: newCat === 'entrada' ? newEntryType : undefined,
+      recurrence: newCat === 'parcela_intermediaria' ? newRecurrence : undefined,
+      installmentsCount: newCount,
+    });
   };
 
+  const handleEntryTypeChange = (newEntry: EntryType) => {
+    setEntryType(newEntry);
+    const entryLabels: Record<EntryType, string> = {
+      dinheiro: 'Dinheiro', imovel: 'Imóvel', veiculo: 'Veículo', servico: 'Serviço', outros: 'Outro'
+    };
+    onUpdateItem({
+      ...item,
+      entryType: newEntry,
+      description: `Entrada - ${entryLabels[newEntry]}`
+    });
+  };
 
-  // Quando o usuário digita o valor em R$
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     const numeric = parseBRLString(raw);
     setValueStr(numeric > 0 ? formatBRL(numeric) : '');
 
     if (numeric > 0 && totalProposal > 0) {
-      const count = category === 'parcela_intermediaria' ? Math.max(1, installmentsCount) : 1;
+      const count = item.category === 'parcela_intermediaria' ? Math.max(1, installmentsCount) : 1;
       const totalGroupVal = numeric * count;
       const p = (totalGroupVal / totalProposal) * 100;
-      setPercentStr(p.toFixed(2));
+      const rounded = Math.round(p * 100) / 100;
+      setPercentStr(rounded > 0 ? String(rounded) : '');
     } else if (numeric === 0) {
       setPercentStr('');
     }
+
+    onUpdateItem({ ...item, value: numeric });
   };
 
-  // Sincroniza quando o valor total da proposta muda
-  useEffect(() => {
+  const handlePercentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let raw = e.target.value;
+    raw = raw.replace('%', '').replace(',', '.').trim();
+    raw = raw.replace(/[^\d.]/g, '');
+    const parts = raw.split('.');
+    if (parts.length > 2) raw = parts[0] + '.' + parts.slice(1).join('');
+
+    setPercentStr(raw);
+
+    const p = parseFloat(raw);
+    if (!isNaN(p) && p > 0 && totalProposal > 0) {
+      const count = item.category === 'parcela_intermediaria' ? Math.max(1, installmentsCount) : 1;
+      const totalGroupVal = (p / 100) * totalProposal;
+      const valPerInst = totalGroupVal / count;
+      setValueStr(formatBRL(valPerInst));
+      onUpdateItem({ ...item, value: valPerInst });
+    } else if (raw === '') {
+      setValueStr('');
+      onUpdateItem({ ...item, value: 0 });
+    }
+  };
+
+  const handleInstallmentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const countVal = parseInt(e.target.value, 10);
+    const validCount = isNaN(countVal) || countVal < 1 ? 1 : countVal;
+    setInstallmentsCount(validCount);
+
     if (percentStr && totalProposal > 0) {
       const p = parseFloat(percentStr);
       if (!isNaN(p) && p > 0) {
-        const count = category === 'parcela_intermediaria' ? Math.max(1, installmentsCount) : 1;
         const totalGroupVal = (p / 100) * totalProposal;
-        const valPerInst = totalGroupVal / count;
+        const valPerInst = totalGroupVal / validCount;
         setValueStr(formatBRL(valPerInst));
-      }
-    }
-  }, [totalProposal]);
-
-  // Submissão do item
-  const handleAddItem = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validação
-    const newErrors: Record<string, string> = {};
-    const numericValue = parseBRLString(valueStr);
-
-    if (totalProposal <= 0 || !keyDeliveryDate) {
-      newErrors.config = 'É obrigatório informar o Preço da Proposta e a Data de Entrega no primeiro painel antes de lançar pagamentos.';
-    }
-    
-    if (numericValue <= 0) {
-      newErrors.value = 'Informe um valor ou percentual maior que 0';
-    }
-    
-    if (category !== 'chaves' && !startDate) {
-      newErrors.startDate = 'Informe uma data de vencimento/entrega';
-    }
-
-    if (category === 'parcela_intermediaria') {
-      if (installmentsCount < 1 || installmentsCount > 140) {
-        newErrors.installmentsCount = 'Quantidade deve ser entre 1 e 140 parcelas';
+        onUpdateItem({ ...item, installmentsCount: validCount, value: valPerInst });
+        return;
       }
     }
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+    onUpdateItem({ ...item, installmentsCount: validCount });
+  };
 
-    // A data das chaves é sempre igual a data de entrega do empreendimento
-    const finalStartDate = category === 'chaves' 
-      ? (keyDeliveryDate || new Date().toISOString().split('T')[0]) 
-      : startDate;
-
-    // Criar o objeto de pagamento
-    const newItem: PaymentItem = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      category,
-      description: description.trim(),
-      value: numericValue,
-      startDate: finalStartDate,
-      installmentsCount: category === 'parcela_intermediaria' ? installmentsCount : 1,
-      entryType: category === 'entrada' ? entryType : undefined,
-      recurrence: category === 'parcela_intermediaria' ? recurrence : undefined,
+  const handleRecurrenceChange = (newRec: RecurrenceType) => {
+    setRecurrence(newRec);
+    const recLabels: Record<RecurrenceType, string> = {
+      mensal: 'Mensal', trimestral: 'Trimestral', semestral: 'Semestral', anual: 'Anual'
     };
-
-    setPaymentItems((prev) => [...prev, newItem]);
-    
-    // Limpar campos
-    setValueStr('');
-    setPercentStr('');
-    setStartDate('');
-    setErrors({});
-
-    if (onItemAdded) {
-      onItemAdded();
-    }
+    onUpdateItem({
+      ...item,
+      recurrence: newRec,
+      description: `Intermediárias ${recLabels[newRec]}s`
+    });
   };
 
-  const parsedNumericVal = parseBRLString(valueStr);
-
-  const totalItemsSum = paymentItems.reduce((acc, item) => acc + (item.value * item.installmentsCount), 0);
-  const launchedPercent = totalProposal > 0 ? (totalItemsSum / totalProposal) * 100 : 0;
-  const unlaunchedPercent = Math.max(0, 100 - launchedPercent);
-
-  const formatPercentSimple = (val: number): string => {
-    const rounded = Math.round(val * 100) / 100;
-    return Number.isInteger(rounded) ? `${rounded}%` : `${rounded.toFixed(2)}%`;
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    setStartDate(newDate);
+    onUpdateItem({ ...item, startDate: newDate });
   };
 
-  const isBlocked = !totalProposal || !keyDeliveryDate;
-
-  const isSectionFilled = launchedPercent >= 99.99;
+  const itemTotal = item.value * (item.installmentsCount || 1);
+  const itemPercent = totalProposal > 0 ? (itemTotal / totalProposal) * 100 : 0;
 
   return (
-    <div className="glass-card animate-fade-in" style={{ padding: '0', marginBottom: '1.5rem', overflow: 'hidden' }}>
-      {/* Cabeçalho Clicável do Accordion */}
-      <div 
-        onClick={onToggle}
-        style={{ 
-          padding: '1.25rem 1.5rem', 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          cursor: 'pointer',
-          background: isExpanded ? 'rgba(255, 255, 255, 0.04)' : 'transparent',
-          transition: 'background 0.2s ease',
-          userSelect: 'none'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ 
-            width: '10px', 
-            height: '10px', 
-            borderRadius: '50%', 
-            backgroundColor: isSectionFilled ? 'var(--color-primary)' : 'var(--text-secondary)', 
-            boxShadow: isSectionFilled ? '0 0 10px var(--color-primary-glow), 0 0 4px var(--color-primary)' : 'none',
-            display: 'inline-block',
-            flexShrink: 0,
-            transition: 'all 0.3s ease'
-          }} />
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-            PAGAMENTOS
-          </h2>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          {/* Percentual Lançado / Percentual Restante Não Lançado */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', fontWeight: 700 }}>
-            <span style={{ color: 'var(--color-primary)', background: 'rgba(214, 255, 0, 0.12)', border: '1px solid rgba(214, 255, 0, 0.25)', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-sm)' }} title="Percentual Lançado">
-              {formatPercentSimple(launchedPercent)}
-            </span>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>/</span>
-            <span style={{ color: 'var(--color-warning)', background: 'rgba(188, 188, 188, 0.12)', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-sm)' }} title="Percentual Não Lançado">
-              {formatPercentSimple(unlaunchedPercent)}
-            </span>
-          </div>
-
-          {isExpanded ? <ChevronUp size={20} style={{ color: 'var(--text-secondary)' }} /> : <ChevronDown size={20} style={{ color: 'var(--text-secondary)' }} />}
-        </div>
-      </div>
-
-      {/* Conteúdo Expansível (Formulário de Criação) */}
-      {isExpanded && (
-        <div style={{ padding: '1.5rem', borderTop: '1px solid var(--card-border)' }}>
-          
-          {/* Banner de Aviso de Obrigatoriedade (Laranja) */}
-          {isBlocked && (
-            <div style={{ 
-              fontSize: '0.85rem', 
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-              color: '#f59e0b', 
-              background: 'rgba(245, 158, 11, 0.12)', 
-              padding: '0.85rem 1.1rem', 
-              borderRadius: 'var(--radius-sm)', 
-              border: '1px solid rgba(245, 158, 11, 0.35)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.6rem', 
-              marginBottom: '1.25rem' 
-            }}>
-              <AlertCircle size={20} style={{ color: '#f59e0b', flexShrink: 0 }} />
-              <span>PREENCHA O PREÇO E DATA DE ENTREGA</span>
-            </div>
-          )}
-
-          {errors.config && (
-            <div className="form-error" style={{ fontSize: '0.85rem', marginBottom: '1rem', fontWeight: 600 }}>
-              {errors.config}
-            </div>
-          )}
-
-          <form onSubmit={handleAddItem} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', opacity: isBlocked ? 0.6 : 1 }}>
-            
-            {/* Categoria */}
+    <div 
+      className="payment-list-item animate-fade-in"
+      style={{
+        background: 'rgb(0, 36, 30)',
+        border: 'none',
+        borderRadius: 'var(--radius-md)',
+        padding: '0.85rem 1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem'
+      }}
+    >
+      {/* Se for a categoria ENTRADA */}
+      {item.category === 'entrada' ? (
+        <>
+          {/* LINHA 1 (Entrada): Categoria + Modalidade Entrada */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
             <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Categoria
+              </label>
               <select 
                 className="form-select" 
-                value={category} 
-                onChange={(e) => setCategory(e.target.value as PaymentCategory)}
+                value={item.category} 
+                onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
                 disabled={isBlocked}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem' }}
               >
                 <option value="sinal">Sinal</option>
                 <option value="entrada">Entrada</option>
@@ -331,167 +235,451 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
               </select>
             </div>
 
-            {/* Sub-configuração para Entrada */}
-            {category === 'entrada' && (
-              <div className="form-group animate-fade-in">
-                <select 
-                  className="form-select" 
-                  value={entryType} 
-                  onChange={(e) => setEntryType(e.target.value as EntryType)}
-                  disabled={isBlocked}
-                >
-                  <option value="dinheiro">Dinheiro</option>
-                  <option value="imovel">Imóvel</option>
-                  <option value="veiculo">Veículo</option>
-                  <option value="servico">Serviço</option>
-                  <option value="outros">Outro</option>
-                </select>
-              </div>
-            )}
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Modalidade Entrada
+              </label>
+              <select 
+                className="form-select" 
+                value={entryType} 
+                onChange={(e) => handleEntryTypeChange(e.target.value as EntryType)}
+                disabled={isBlocked}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem' }}
+              >
+                <option value="dinheiro">Dinheiro</option>
+                <option value="imovel">Imóvel</option>
+                <option value="veiculo">Veículo</option>
+                <option value="servico">Serviço</option>
+                <option value="outros">Outro</option>
+              </select>
+            </div>
+          </div>
 
-            {/* Aviso / Notificação para Chaves */}
-            {category === 'chaves' && (
-              <div className="form-group animate-fade-in">
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'rgba(255, 255, 255, 0.03)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Key size={16} style={{ color: 'var(--color-primary)' }} />
-                  <span>Vencimento das chaves: <strong>{keyDeliveryDate ? formatDateBR(keyDeliveryDate) : 'Igual à Data de Entrega das Chaves'}</strong></span>
-                </div>
-              </div>
-            )}
+          {/* LINHA 2 (Entrada): Percentual (%) + Valor (R$) */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Percentual (%)
+              </label>
+              <input
+                ref={percentInputRef}
+                type="text"
+                className="form-input"
+                value={percentStr ? `${percentStr}%` : ''}
+                onChange={handlePercentChange}
+                onFocus={setCursorBeforePercent}
+                onClick={setCursorBeforePercent}
+                onKeyUp={setCursorBeforePercent}
+                placeholder="0%"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                disabled={isBlocked}
+              />
+            </div>
 
-            {/* Recorrência e Qtd Parcelas (Apenas para Intermediárias) */}
-            {category === 'parcela_intermediaria' && (
-              <div className="grid-2 animate-fade-in">
-                <div className="form-group">
-                  <select 
-                    className="form-select" 
-                    value={recurrence} 
-                    onChange={(e) => setRecurrence(e.target.value as RecurrenceType)}
-                    disabled={isBlocked}
-                  >
-                    <option value="mensal">Mensal</option>
-                    <option value="trimestral">Trimestral</option>
-                    <option value="semestral">Semestral</option>
-                    <option value="anual">Anual</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <input
-                    type="number"
-                    className={`form-input ${errors.installmentsCount ? 'error' : ''}`}
-                    value={installmentsCount || ''}
-                    min={1}
-                    max={140}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value, 10);
-                      handleInstallmentsChange(isNaN(val) ? 0 : val);
-                    }}
-                    placeholder="Parcelas (1 a 140)"
-                    disabled={isBlocked}
-                  />
-                  {errors.installmentsCount && <span className="form-error">{errors.installmentsCount}</span>}
-                </div>
-              </div>
-            )}
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Valor (R$)
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                value={valueStr}
+                onChange={handleValueChange}
+                placeholder="R$ 0,00"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                disabled={isBlocked}
+              />
+            </div>
+          </div>
 
-            {/* Valor % e Valor R$ em paralelo */}
-            <div className="grid-2">
-              {/* Campo % do imóvel com máscara */}
-              <div className="form-group">
+          {/* LINHA 3 (Entrada): Vencimento em uma linha sozinho */}
+          <div className="form-group">
+            <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+              Vencimento
+            </label>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <CalendarDays 
+                size={15} 
+                style={{ position: 'absolute', left: '0.65rem', color: 'var(--text-muted)', pointerEvents: 'none' }} 
+              />
+              <input
+                type="date"
+                className="form-input"
+                value={startDate}
+                onChange={handleDateChange}
+                onClick={(e) => {
+                  try {
+                    (e.target as HTMLInputElement).showPicker?.();
+                  } catch {}
+                }}
+                style={{ paddingLeft: '2rem', paddingRight: '0.4rem', fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem 0.55rem 2rem' }}
+                disabled={isBlocked}
+              />
+            </div>
+          </div>
+        </>
+      ) : item.category === 'parcela_intermediaria' ? (
+        <>
+          {/* INTERMEDIÁRIAS LAYOUT */}
+          {/* LINHA 1: Categoria + Recorrência */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Categoria
+              </label>
+              <select 
+                className="form-select" 
+                value={item.category} 
+                onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
+                disabled={isBlocked}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem' }}
+              >
+                <option value="sinal">Sinal</option>
+                <option value="entrada">Entrada</option>
+                <option value="parcela_intermediaria">Intermediárias</option>
+                <option value="chaves">Chaves</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Recorrência
+              </label>
+              <select 
+                className="form-select" 
+                value={recurrence} 
+                onChange={(e) => handleRecurrenceChange(e.target.value as RecurrenceType)}
+                disabled={isBlocked}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem' }}
+              >
+                <option value="mensal">Mensal</option>
+                <option value="trimestral">Trimestral</option>
+                <option value="semestral">Semestral</option>
+                <option value="anual">Anual</option>
+              </select>
+            </div>
+          </div>
+
+          {/* LINHA 2: Parcelas (Qtd) + Percentual (%) */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Parcelas (Qtd)
+              </label>
+              <input
+                type="number"
+                className="form-input"
+                value={installmentsCount || ''}
+                min={1}
+                max={140}
+                onChange={handleInstallmentsChange}
+                placeholder="1 a 140"
+                disabled={isBlocked}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+              />
+            </div>
+
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Percentual (%)
+              </label>
+              <input
+                ref={percentInputRef}
+                type="text"
+                className="form-input"
+                value={percentStr ? `${percentStr}%` : ''}
+                onChange={handlePercentChange}
+                onFocus={setCursorBeforePercent}
+                onClick={setCursorBeforePercent}
+                onKeyUp={setCursorBeforePercent}
+                placeholder="0%"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                disabled={isBlocked}
+              />
+            </div>
+          </div>
+
+          {/* LINHA 3: Valor Parcela (R$) + Vencimento */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Valor Parcela
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                value={valueStr}
+                onChange={handleValueChange}
+                placeholder="R$ 0,00"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                disabled={isBlocked}
+              />
+            </div>
+
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Vencimento
+              </label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <CalendarDays 
+                  size={15} 
+                  style={{ position: 'absolute', left: '0.65rem', color: 'var(--text-muted)', pointerEvents: 'none' }} 
+                />
                 <input
-                  ref={percentInputRef}
-                  type="text"
+                  type="date"
                   className="form-input"
-                  value={percentStr ? `${percentStr}%` : ''}
-                  onChange={handlePercentChange}
-                  onFocus={setCursorBeforePercent}
-                  onClick={setCursorBeforePercent}
-                  onKeyUp={setCursorBeforePercent}
-                  placeholder="Percentual (0%)"
-                  style={{ fontWeight: 600 }}
+                  value={startDate}
+                  onChange={handleDateChange}
+                  onClick={(e) => {
+                    try {
+                      (e.target as HTMLInputElement).showPicker?.();
+                    } catch {}
+                  }}
+                  style={{ paddingLeft: '2rem', paddingRight: '0.4rem', fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem 0.55rem 2rem' }}
                   disabled={isBlocked}
                 />
               </div>
-
-              {/* Campo R$ (por parcela ou total) */}
-              <div className="form-group">
-                <div className="currency-input-wrapper">
-                  <input
-                    type="text"
-                    className={`form-input ${errors.value ? 'error' : ''}`}
-                    value={valueStr}
-                    onChange={handleValueChange}
-                    placeholder={category === 'parcela_intermediaria'
-                      ? 'Valor parcela (R$ 0)' 
-                      : 'Valor (R$ 0)'}
-                    style={{ fontWeight: 600 }}
-                    disabled={isBlocked}
-                  />
-                </div>
-                {errors.value && <span className="form-error">{errors.value}</span>}
-              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Sinal e Chaves */}
+          {/* LINHA 1: Categoria + Percentual (%) */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Categoria
+              </label>
+              <select 
+                className="form-select" 
+                value={item.category} 
+                onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
+                disabled={isBlocked}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem' }}
+              >
+                <option value="sinal">Sinal</option>
+                <option value="entrada">Entrada</option>
+                <option value="parcela_intermediaria">Intermediárias</option>
+                <option value="chaves">Chaves</option>
+              </select>
             </div>
 
-            {/* Resumo do Cálculo Dinâmico */}
-            {parsedNumericVal > 0 && (
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '-0.5rem', paddingLeft: '0.5rem' }}>
-                {category === 'parcela_intermediaria' ? (
-                  <>
-                    {installmentsCount}x de <strong>{formatBRL(parsedNumericVal)}</strong> = Total de <strong>{formatBRL(parsedNumericVal * installmentsCount)}</strong>
-                    {totalProposal > 0 && (
-                      <> (<strong>{(((parsedNumericVal * installmentsCount) / totalProposal) * 100).toFixed(2)}%</strong> do imóvel)</>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    Valor: <strong>{formatBRL(parsedNumericVal)}</strong>
-                    {totalProposal > 0 && (
-                      <> (<strong>{((parsedNumericVal / totalProposal) * 100).toFixed(2)}%</strong> do imóvel)</>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Percentual (%)
+              </label>
+              <input
+                ref={percentInputRef}
+                type="text"
+                className="form-input"
+                value={percentStr ? `${percentStr}%` : ''}
+                onChange={handlePercentChange}
+                onFocus={setCursorBeforePercent}
+                onClick={setCursorBeforePercent}
+                onKeyUp={setCursorBeforePercent}
+                placeholder="0%"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                disabled={isBlocked}
+              />
+            </div>
+          </div>
 
-            {/* Data de Vencimento / Entrega com Calendário (Apenas se não for chaves) */}
-            {category !== 'chaves' && (
-              <div className="form-group">
+          {/* LINHA 2: Valor (R$) + Data de Vencimento / Entrega */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Valor (R$)
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                value={valueStr}
+                onChange={handleValueChange}
+                placeholder="R$ 0,00"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                disabled={isBlocked}
+              />
+            </div>
+
+            <div className="form-group">
+              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Vencimento
+              </label>
+              {item.category === 'chaves' ? (
+                <div style={{ fontSize: 'clamp(0.75rem, 2.8vw, 0.85rem)', color: 'var(--color-primary)', background: 'var(--color-success-bg)', border: '1px solid var(--color-success-border)', padding: '0.55rem 0.5rem', borderRadius: 'var(--radius-md)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Key size={14} />
+                  <span>{keyDeliveryDate ? formatDateBR(keyDeliveryDate) : 'Na Entrega'}</span>
+                </div>
+              ) : (
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <CalendarDays 
-                    size={18} 
-                    style={{ position: 'absolute', left: '1rem', color: 'var(--text-muted)', pointerEvents: 'none' }} 
+                    size={15} 
+                    style={{ position: 'absolute', left: '0.65rem', color: 'var(--text-muted)', pointerEvents: 'none' }} 
                   />
                   <input
                     type="date"
-                    className={`form-input ${errors.startDate ? 'error' : ''}`}
+                    className="form-input"
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={handleDateChange}
                     onClick={(e) => {
                       try {
                         (e.target as HTMLInputElement).showPicker?.();
                       } catch {}
                     }}
-                    style={{ paddingLeft: '2.5rem', cursor: isBlocked ? 'not-allowed' : 'pointer' }}
-                    required
+                    style={{ paddingLeft: '2rem', paddingRight: '0.4rem', fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem 0.55rem 2rem' }}
                     disabled={isBlocked}
                   />
                 </div>
-                {errors.startDate && <span className="form-error">{errors.startDate}</span>}
-              </div>
-            )}
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
-            {/* Botão de Submeter */}
-            <button 
-              type="submit" 
-              className="btn btn-primary" 
-              style={{ marginTop: '0.5rem', opacity: isBlocked ? 0.5 : 1, cursor: isBlocked ? 'not-allowed' : 'pointer' }}
+      {/* Linha Inferior: Subtotal (Esquerda) + Excluir (Direita) */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        paddingTop: '0.5rem', 
+        marginTop: '0.2rem',
+        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+        fontSize: '0.8rem'
+      }}>
+        {/* Esquerda: Subtotal + % */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <span style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+            Subtotal: {formatBRL(itemTotal)}
+          </span>
+          {itemPercent > 0 && (
+            <span style={{ color: 'var(--color-primary)', fontWeight: 700, background: 'var(--color-success-bg)', padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-success-border)', fontSize: '0.75rem' }}>
+              {Number.isInteger(Math.round(itemPercent * 100) / 100)
+                ? `${Math.round(itemPercent)}%`
+                : `${(Math.round(itemPercent * 100) / 100)}%`}
+            </span>
+          )}
+        </div>
+
+        {/* Direita: Botão Excluir */}
+        <button
+          type="button"
+          onClick={() => onRemoveItem(item.id)}
+          className="btn btn-danger btn-sm"
+          style={{ padding: '0.4rem 0.65rem', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem' }}
+          title="Excluir pagamento"
+        >
+          <Trash2 size={14} />
+          <span>Excluir</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const PaymentForm: React.FC<PaymentFormProps> = ({
+  paymentItems,
+  setPaymentItems,
+  keyDeliveryDate,
+  totalProposal,
+}) => {
+  const isBlocked = !totalProposal || !keyDeliveryDate;
+
+  const handleAddPaymentRow = () => {
+    const hasSinal = paymentItems.some(i => i.category === 'sinal');
+    const defaultCat: PaymentCategory = hasSinal ? 'entrada' : 'sinal';
+    const defaultDesc = defaultCat === 'sinal' ? 'Sinal de Reserva' : 'Entrada - Dinheiro';
+
+    const newPaymentItem: PaymentItem = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      category: defaultCat,
+      description: defaultDesc,
+      value: 0,
+      installmentsCount: 1,
+      entryType: defaultCat === 'entrada' ? 'dinheiro' : undefined,
+      startDate: new Date().toISOString().split('T')[0],
+    };
+
+    setPaymentItems((prev) => [newPaymentItem, ...prev]);
+  };
+
+  const handleUpdateItem = (updatedItem: PaymentItem) => {
+    setPaymentItems((prev) => prev.map((item) => (item.id === updatedItem.id ? updatedItem : item)));
+  };
+
+  const handleRemoveItem = (id: string) => {
+    setPaymentItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  return (
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {/* Botão de Adicionar Pagamento no Topo */}
+      {!isBlocked && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.25rem' }}>
+          <button
+            type="button"
+            onClick={handleAddPaymentRow}
+            className="btn btn-primary btn-sm"
+            style={{ fontSize: '0.85rem', padding: '0.55rem 1.1rem', borderRadius: '25px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <Plus size={16} /> ADICIONAR PAGAMENTO
+          </button>
+        </div>
+      )}
+
+      {/* Banner de Aviso de Obrigatoriedade (Laranja) */}
+      {isBlocked && (
+        <div style={{ 
+          fontSize: '0.85rem', 
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em',
+          color: '#f59e0b', 
+          background: 'rgba(245, 158, 11, 0.12)', 
+          padding: '0.85rem 1.1rem', 
+          borderRadius: '25px', 
+          border: '1px solid rgba(245, 158, 11, 0.35)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '0.6rem', 
+          marginBottom: '0.5rem' 
+        }}>
+          <AlertCircle size={20} style={{ color: '#f59e0b', flexShrink: 0 }} />
+          <span>PREENCHA O PREÇO E DATA DE ENTREGA NO PAINEL ACIMA</span>
+        </div>
+      )}
+
+      {/* Lista de Pagamentos Gerados Dinamicamente */}
+      {paymentItems.length === 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', gap: '1rem', padding: '2.5rem 0' }}>
+          <Wallet size={48} strokeWidth={1} />
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '0.95rem', fontWeight: 500 }}>Nenhum pagamento adicionado ainda</p>
+            <p style={{ fontSize: '0.8rem', marginBottom: '1rem' }}>Clique no botão abaixo para adicionar o primeiro item de pagamento.</p>
+            <button
+              type="button"
+              onClick={handleAddPaymentRow}
+              className="btn btn-primary"
               disabled={isBlocked}
+              style={{ borderRadius: '25px' }}
             >
-              <Plus size={18} />
-              ADICIONAR ITEM
+              <Plus size={18} /> ADICIONAR PAGAMENTO
             </button>
-
-          </form>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {paymentItems.map((item) => (
+            <PaymentRowItem
+              key={item.id}
+              item={item}
+              totalProposal={totalProposal}
+              keyDeliveryDate={keyDeliveryDate}
+              isBlocked={isBlocked}
+              onUpdateItem={handleUpdateItem}
+              onRemoveItem={handleRemoveItem}
+            />
+          ))}
         </div>
       )}
     </div>
