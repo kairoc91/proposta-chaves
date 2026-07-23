@@ -217,41 +217,38 @@ export async function generateProposalPDF({
     }
 
     const pdfBlob = pdf.output('blob');
-    const pdfFile = new File([pdfBlob], 'proposta.pdf', { type: 'application/pdf' });
+    const fileName = 'proposta.pdf';
+    const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
-    // Tentar usar o menu nativo de compartilhamento no mobile/desktop
+    // 1. Tentar Web Share API nativa com arquivo (funciona no Safari iOS e Android Chrome)
     if (typeof navigator.share === 'function') {
-      // 1. Tentar compartilhar o arquivo PDF diretamente
       try {
-        await navigator.share({
-          files: [pdfFile],
-          title: 'Proposta Comercial',
-          text: 'Segue a proposta comercial em PDF.',
-        });
-        return;
-      } catch (shareError) {
-        if (shareError instanceof Error && shareError.name === 'AbortError') {
-          return; // Usuário fechou o menu de compartilhamento
-        }
-      }
-
-      // 2. Se o navegador não aceitar a propriedade 'files', tenta compartilhar com o título/texto
-      try {
-        if (navigator.canShare && navigator.canShare({ title: 'Proposta Comercial' })) {
+        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
           await navigator.share({
+            files: [pdfFile],
             title: 'Proposta Comercial',
-            text: 'Proposta comercial gerada com sucesso.',
+            text: 'Segue a proposta comercial em PDF.',
           });
+          return;
         }
       } catch (shareError) {
         if (shareError instanceof Error && shareError.name === 'AbortError') {
-          return;
+          return; // Usuário fechou a janela de compartilhamento
         }
       }
     }
 
-    // Fallback final: Download direto do arquivo PDF
-    pdf.save('proposta.pdf');
+    // 2. Para Chrome Mobile (Android/iOS) onde navigator.share de arquivo falha:
+    // Criar um elemento <a> com Blob URL e forçar o download/abertura nativa no Chrome
+    const blobUrl = URL.createObjectURL(pdfBlob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
   } finally {
     // Limpar o container temporário
     if (pdfContainer.parentNode) {
