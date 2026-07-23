@@ -50,6 +50,26 @@ export const CalculatorMain: React.FC = () => {
     }
   }, [isFullyDistributed]);
 
+  // Ao fechar o teclado numérico do mobile (focusout), faz o scroll suave de volta ao topo mostrando a logo
+  useEffect(() => {
+    const handleFocusOut = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'SELECT')) {
+        setTimeout(() => {
+          const active = document.activeElement as HTMLElement | null;
+          if (!active || (active.tagName !== 'INPUT' && active.tagName !== 'SELECT')) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 150);
+      }
+    };
+
+    window.addEventListener('focusout', handleFocusOut);
+    return () => {
+      window.removeEventListener('focusout', handleFocusOut);
+    };
+  }, []);
+
   const handleAdvanceToStep3 = () => {
     if (totalItemsSum === 0) {
       setStep2Warning('Por favor, adicione ao menos 1 pagamento antes de avançar.');
