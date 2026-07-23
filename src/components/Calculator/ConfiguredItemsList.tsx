@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import type { PaymentItem, PaymentCategory, RecurrenceType } from '../../utils/calculatorEngine';
 import { formatBRL, parseBRLString } from '../../utils/formatters';
-import { Trash2, FileText, CalendarDays } from 'lucide-react';
+import { Trash2, FileText } from 'lucide-react';
+import { InputHelper } from './InputHelper';
+import { DateInput } from './DateInput';
 
 interface ConfiguredItemsListProps {
   paymentItems: PaymentItem[];
@@ -118,16 +120,15 @@ const InlineItemRow: React.FC<InlineItemRowProps> = ({
     onUpdateItem({ ...item, startDate: newDate });
   };
 
-  const itemTotal = item.value * (item.installmentsCount || 1);
-  const itemPercent = totalProposal > 0 ? (itemTotal / totalProposal) * 100 : 0;
+
 
   return (
     <div 
       className="payment-list-item"
       style={{
         background: 'rgba(255, 255, 255, 0.03)',
-        border: '1px solid var(--card-border)',
-        borderRadius: 'var(--radius-md)',
+        border: 'none',
+        borderRadius: '18px',
         padding: '1rem',
         display: 'flex',
         flexDirection: 'column',
@@ -166,7 +167,7 @@ const InlineItemRow: React.FC<InlineItemRowProps> = ({
         </button>
       </div>
 
-      {/* Linha Intermediária: Campos de Edição Direta de Valores, Datas e Recorrência */}
+      {/* Linha Intermediária: Campos de Edição Direta */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', 
@@ -174,37 +175,38 @@ const InlineItemRow: React.FC<InlineItemRowProps> = ({
         alignItems: 'center' 
       }}>
         {/* Input Percentual % */}
-        <div className="form-group" style={{ gap: '0.2rem' }}>
-          <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>PERCENTUAL</label>
+        <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <input
             type="text"
             className="form-input"
             value={percentStr ? `${percentStr}%` : ''}
             onChange={handlePercentChange}
-            placeholder="0%"
-            style={{ fontSize: '0.85rem', fontWeight: 600, padding: '0.45rem 0.65rem' }}
+            placeholder="Percentual (%)"
+            style={{ fontSize: '0.85rem', fontWeight: 600, padding: '0.45rem 2.4rem' }}
           />
+          <div className="input-helper-container">
+            <InputHelper title="Percentual" text="Percentual do item no total da proposta." />
+          </div>
         </div>
 
         {/* Input Valor R$ (por parcela) */}
-        <div className="form-group" style={{ gap: '0.2rem' }}>
-          <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            {item.category === 'parcela_intermediaria' ? 'VALOR PARCELA' : 'VALOR (R$)'}
-          </label>
+        <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <input
             type="text"
             className="form-input"
             value={valueStr}
             onChange={handleValueChange}
-            placeholder="R$ 0,00"
-            style={{ fontSize: '0.85rem', fontWeight: 600, padding: '0.45rem 0.65rem' }}
+            placeholder={item.category === 'parcela_intermediaria' ? 'Valor Parcela' : 'Valor (R$)'}
+            style={{ fontSize: '0.85rem', fontWeight: 600, padding: '0.45rem 2.4rem' }}
           />
+          <div className="input-helper-container">
+            <InputHelper title="Valor" text="Valor em reais de cada parcela ou total." />
+          </div>
         </div>
 
         {/* Quantidade de Parcelas (apenas se for intermediária) */}
         {item.category === 'parcela_intermediaria' && (
-          <div className="form-group" style={{ gap: '0.2rem' }}>
-            <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>QTD PARCELAS</label>
+          <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <input
               type="number"
               className="form-input"
@@ -212,51 +214,49 @@ const InlineItemRow: React.FC<InlineItemRowProps> = ({
               min={1}
               max={140}
               onChange={handleInstallmentsChange}
-              placeholder="Qtd (1)"
-              style={{ fontSize: '0.85rem', fontWeight: 600, padding: '0.45rem 0.65rem' }}
+              placeholder="Qtd. Parcelas"
+              style={{ fontSize: '0.85rem', fontWeight: 600, padding: '0.45rem 2.4rem' }}
             />
+            <div className="input-helper-container">
+              <InputHelper title="Qtd. Parcelas" text="Quantidade de parcelas intermediárias." />
+            </div>
           </div>
         )}
 
         {/* Recorrência (apenas se for intermediária) */}
         {item.category === 'parcela_intermediaria' && (
-          <div className="form-group" style={{ gap: '0.2rem' }}>
-            <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>RECORRÊNCIA</label>
+          <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <select
               className="form-select"
               value={recurrence}
               onChange={(e) => handleRecurrenceChange(e.target.value as RecurrenceType)}
-              style={{ fontSize: '0.85rem', fontWeight: 600, padding: '0.45rem 0.65rem' }}
+              style={{ fontSize: '0.85rem', fontWeight: 600, padding: '0.45rem 2.4rem' }}
             >
               <option value="mensal">Mensal</option>
               <option value="trimestral">Trimestral</option>
               <option value="semestral">Semestral</option>
               <option value="anual">Anual</option>
             </select>
+            <div className="input-helper-container">
+              <InputHelper title="Recorrência" text="Frequência entre parcelas." />
+            </div>
           </div>
         )}
 
         {/* Data de Vencimento / Início (Apenas se não for chaves) */}
         {item.category !== 'chaves' && (
-          <div className="form-group" style={{ gap: '0.2rem' }}>
-            <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>VENCIMENTO / INÍCIO</label>
+          <div className="form-group">
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <CalendarDays 
-                size={14} 
-                style={{ position: 'absolute', left: '0.65rem', color: 'var(--text-muted)', pointerEvents: 'none' }} 
-              />
-              <input
-                type="date"
+              <DateInput
                 className="form-input"
                 value={startDate}
                 onChange={handleDateChange}
-                onClick={(e) => {
-                  try {
-                    (e.target as HTMLInputElement).showPicker?.();
-                  } catch {}
-                }}
-                style={{ fontSize: '0.85rem', fontWeight: 500, paddingLeft: '2rem', paddingRight: '0.5rem', paddingTop: '0.45rem', paddingBottom: '0.45rem', cursor: 'pointer' }}
+                placeholder="dd/mm/aaaa"
+                style={{ fontSize: '0.85rem', fontWeight: 500, padding: '0.45rem 2.4rem', cursor: 'pointer' }}
               />
+              <div className="input-helper-container">
+                <InputHelper title="Vencimento" text="Data de vencimento." />
+              </div>
             </div>
           </div>
         )}
@@ -276,16 +276,6 @@ const InlineItemRow: React.FC<InlineItemRowProps> = ({
             <>{item.installmentsCount}x de <strong>{formatBRL(item.value)}</strong> ({item.recurrence})</>
           ) : (
             <>Pagamento Único</>
-          )}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <span style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: '0.95rem' }}>
-            Subtotal: {formatBRL(itemTotal)}
-          </span>
-          {itemPercent > 0 && (
-            <span style={{ color: 'var(--color-primary)', fontWeight: 700, background: 'var(--color-success-bg)', padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-success-border)', fontSize: '0.75rem' }}>
-              {itemPercent.toFixed(2)}%
-            </span>
           )}
         </div>
       </div>

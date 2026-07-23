@@ -4,8 +4,8 @@ import type { PaymentItem } from '../../utils/calculatorEngine';
 import { ConfigForm } from './ConfigForm';
 import { PaymentForm } from './PaymentForm';
 import { generateProposalPDF } from '../../utils/pdfGenerator';
-import { formatBRL, formatDateBR } from '../../utils/formatters';
-import { FileText, RotateCcw, Building2, AlertTriangle, ChevronRight } from 'lucide-react';
+import { formatBRL } from '../../utils/formatters';
+import { Download, RotateCcw, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const CalculatorMain: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -16,7 +16,6 @@ export const CalculatorMain: React.FC = () => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState<boolean>(false);
   const [step2Warning, setStep2Warning] = useState<string | null>(null);
 
-  // Executar os cálculos
   const result = calculatePaymentFlow(
     totalProposal, 
     keyDeliveryDate, 
@@ -26,45 +25,67 @@ export const CalculatorMain: React.FC = () => {
 
   const canAdvanceFromStep1 = totalProposal > 0 && Boolean(keyDeliveryDate);
 
-  // Cálculo da distribuição dos pagamentos
-  const totalItemsSum = paymentItems.reduce((acc, item) => acc + (item.value * (item.installmentsCount || 1)), 0);
-  const remainingAmount = totalProposal - totalItemsSum;
-  const remainingPercent = totalProposal > 0 ? (remainingAmount / totalProposal) * 100 : 0;
-  const isFullyDistributed = Math.abs(remainingAmount) < 0.01;
+  const navButtonStyle: React.CSSProperties = {
+    background: 'none',
+    border: 'none',
+    color: 'var(--color-pantone-9580c)',
+    fontSize: '0.85rem',
+    fontWeight: 800,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.3rem',
+    cursor: 'pointer',
+    padding: '0.4rem 0',
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+    userSelect: 'none',
+  };
 
-  // Limpar aviso quando atingir 100%
+  const totalItemsSum = paymentItems.reduce((acc, item) => acc + (item.value * (item.installmentsCount || 1)), 0);
+  const isFullyDistributed = totalProposal > 0 && Math.abs(totalItemsSum - totalProposal) < 0.01;
+
   useEffect(() => {
     if (isFullyDistributed) {
       setStep2Warning(null);
     }
   }, [isFullyDistributed]);
 
-  const handleResetValues = () => {
-    setTotalProposal(0);
-    setKeyDeliveryDate('');
-    setPaymentItems([]);
-    setIncludeKeysInPercent(false);
-    setStep2Warning(null);
-    setCurrentStep(1);
-  };
-
   const handleAdvanceToStep3 = () => {
-    if (!isFullyDistributed) {
-      if (remainingAmount > 0) {
-        const roundedPercent = Math.round(remainingPercent * 100) / 100;
-        const formattedPercent = Number.isInteger(roundedPercent) ? `${roundedPercent}%` : `${roundedPercent.toFixed(2)}%`;
-        setStep2Warning(`Atenção: É necessário distribuir 100% do preço da proposta. Faltam ${formatBRL(remainingAmount)} (${formattedPercent}) a serem lançados.`);
-      } else {
-        const excessAmount = Math.abs(remainingAmount);
-        const excessPercent = totalProposal > 0 ? (excessAmount / totalProposal) * 100 : 0;
-        const roundedPercent = Math.round(excessPercent * 100) / 100;
-        const formattedPercent = Number.isInteger(roundedPercent) ? `${roundedPercent}%` : `${roundedPercent.toFixed(2)}%`;
-        setStep2Warning(`Atenção: O valor total dos pagamentos excede o preço da proposta em ${formatBRL(excessAmount)} (${formattedPercent}).`);
-      }
+    if (totalItemsSum === 0) {
+      setStep2Warning('Por favor, adicione ao menos 1 pagamento antes de avançar.');
       return;
     }
+
+    if (totalItemsSum < totalProposal) {
+      const remainingAmount = totalProposal - totalItemsSum;
+      const remainingPercent = (remainingAmount / totalProposal) * 100;
+      const roundedPercent = Math.round(remainingPercent * 100) / 100;
+      const formattedPercent = Number.isInteger(roundedPercent) ? `${roundedPercent}%` : `${roundedPercent.toFixed(2)}%`;
+      setStep2Warning(`Atenção: É necessário distribuir 100% do preço da proposta. Faltam ${formatBRL(remainingAmount)} (${formattedPercent}) a serem lançados.`);
+      return;
+    }
+
+    if (totalItemsSum > totalProposal) {
+      const excessAmount = totalItemsSum - totalProposal;
+      const excessPercent = (excessAmount / totalProposal) * 100;
+      const roundedPercent = Math.round(excessPercent * 100) / 100;
+      const formattedPercent = Number.isInteger(roundedPercent) ? `${roundedPercent}%` : `${roundedPercent.toFixed(2)}%`;
+      setStep2Warning(`Atenção: O valor total dos pagamentos ultrapassa o preço da proposta em ${formatBRL(excessAmount)} (${formattedPercent}). Ajuste os valores para avançar.`);
+      return;
+    }
+
     setStep2Warning(null);
     setCurrentStep(3);
+  };
+
+  const handleResetValues = () => {
+    if (window.confirm('Tem certeza que deseja resetar todas as informações?')) {
+      setTotalProposal(0);
+      setKeyDeliveryDate('');
+      setPaymentItems([]);
+      setCurrentStep(1);
+      setStep2Warning(null);
+    }
   };
 
   const handleGeneratePDF = async () => {
@@ -84,24 +105,15 @@ export const CalculatorMain: React.FC = () => {
   };
 
   return (
-    <main className="container" style={{ paddingBottom: '5rem' }}>
+    <main className="container container-sm" style={{ paddingBottom: '3rem' }}>
       
-      {/* 1. Logo da Marca INFINITY 7 (Cor RGB 151, 255, 102) */}
-      <div 
-        className="animate-fade-in"
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingTop: '0.5rem',
-          paddingBottom: '1.25rem'
-        }}
-      >
+      <div style={{ textAlign: 'center', margin: '1.5rem 0 1.25rem 0' }}>
         <div 
           style={{
-            width: 'clamp(220px, 50vw, 320px)',
-            height: 'clamp(40px, 8vw, 56px)',
-            backgroundColor: 'rgb(151, 255, 102)',
+            width: '180px',
+            height: '42px',
+            margin: '0 auto',
+            backgroundColor: 'var(--color-pantone-902c)',
             WebkitMask: 'url(/logo-infinity7.png) no-repeat center / contain',
             mask: 'url(/logo-infinity7.png) no-repeat center / contain',
           }}
@@ -109,89 +121,103 @@ export const CalculatorMain: React.FC = () => {
         />
       </div>
 
-      {/* 2. Stepper Header com Integração Visual (Connected Folder Tab Design) */}
       <div className="connected-stepper-wrapper animate-fade-in">
-        {/* Barra de Abas dos Steps */}
-        <div className="connected-stepper-bar">
-          {/* Step 1 Tab */}
-          <div 
+        <div className="number-stepper-container">
+          <div className="stepper-line" />
+
+          <button
+            type="button"
             onClick={() => setCurrentStep(1)}
-            className={`step-tab ${currentStep === 1 ? 'active' : ''}`}
+            className={`step-item ${currentStep === 1 ? 'active' : ''}`}
+            title="Passo 1: Preço e Data"
+            aria-label="Passo 1: Preço e Data"
           >
-            <ChevronRight size={18} style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.85rem)', textTransform: 'uppercase' }}>
-              PREÇO
-            </span>
-          </div>
+            <div className="step-number-circle">1</div>
+            <span className="step-number-label">PREÇO</span>
+          </button>
 
-          {/* Step 2 Tab */}
-          <div 
+          <button
+            type="button"
             onClick={() => canAdvanceFromStep1 && setCurrentStep(2)}
-            className={`step-tab ${currentStep === 2 ? 'active' : ''} ${!canAdvanceFromStep1 ? 'disabled' : ''}`}
+            disabled={!canAdvanceFromStep1}
+            className={`step-item ${currentStep === 2 ? 'active' : ''} ${!canAdvanceFromStep1 ? 'disabled' : ''}`}
+            title="Passo 2: Pagamentos"
+            aria-label="Passo 2: Pagamentos"
           >
-            <ChevronRight size={18} style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.85rem)', textTransform: 'uppercase' }}>
-              PAGAMENTO
-            </span>
-          </div>
+            <div className="step-number-circle">2</div>
+            <span className="step-number-label">PAGAMENTO</span>
+          </button>
 
-          {/* Step 3 Tab */}
-          <div 
+          <button
+            type="button"
             onClick={() => {
               if (canAdvanceFromStep1) {
                 if (currentStep === 1) setCurrentStep(2);
                 handleAdvanceToStep3();
               }
             }}
-            className={`step-tab ${currentStep === 3 ? 'active' : ''} ${!canAdvanceFromStep1 ? 'disabled' : ''}`}
+            disabled={!canAdvanceFromStep1}
+            className={`step-item ${currentStep === 3 ? 'active' : ''} ${!canAdvanceFromStep1 ? 'disabled' : ''}`}
+            title="Passo 3: Resultado"
+            aria-label="Passo 3: Resultado"
           >
-            <ChevronRight size={18} style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.85rem)', textTransform: 'uppercase' }}>
-              RESULTADO
-            </span>
-          </div>
+            <div className="step-number-circle">3</div>
+            <span className="step-number-label">RESULTADO</span>
+          </button>
         </div>
 
-        {/* Painel de Conteúdo Unificado com a Tab Ativa */}
         <div className="step-content-card">
-          {/* STEP 1: PREÇO E DATA */}
           {currentStep === 1 && (
             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <ConfigForm
-                totalProposal={totalProposal}
-                setTotalProposal={setTotalProposal}
-                keyDeliveryDate={keyDeliveryDate}
-                setKeyDeliveryDate={setKeyDeliveryDate}
-                includeKeysInPercent={includeKeysInPercent}
-                setIncludeKeysInPercent={setIncludeKeysInPercent}
-              />
-
-              {/* Botão de Avançar no Step 1 */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+              {/* Botão de Avançar no Step 1 (Acima dos Inputs) */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.25rem', padding: '0 1rem' }}>
                 <button
                   type="button"
                   onClick={() => setCurrentStep(2)}
                   disabled={!canAdvanceFromStep1}
-                  className="btn btn-primary btn-sm"
                   style={{
-                    width: '100%',
-                    padding: '0.6rem 1rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
+                    ...navButtonStyle,
                     opacity: canAdvanceFromStep1 ? 1 : 0.45,
                     cursor: canAdvanceFromStep1 ? 'pointer' : 'not-allowed'
                   }}
                   title={canAdvanceFromStep1 ? 'Avançar para o próximo passo' : 'Preencha o Preço da Proposta e a Data de Entrega para avançar'}
                 >
-                  AVANÇAR
+                  <span>AVANÇAR</span>
+                  <ChevronRight size={18} />
                 </button>
               </div>
+
+              <ConfigForm
+                totalProposal={totalProposal}
+                setTotalProposal={setTotalProposal}
+                keyDeliveryDate={keyDeliveryDate}
+                setKeyDeliveryDate={setKeyDeliveryDate}
+              />
             </div>
           )}
 
-          {/* STEP 2: LANÇAMENTO DOS PAGAMENTOS */}
           {currentStep === 2 && (
             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem', padding: '0 1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  style={navButtonStyle}
+                >
+                  <ChevronLeft size={18} />
+                  <span>VOLTAR</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleAdvanceToStep3}
+                  style={navButtonStyle}
+                >
+                  <span>AVANÇAR</span>
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+
               <PaymentForm
                 paymentItems={paymentItems}
                 setPaymentItems={setPaymentItems}
@@ -199,7 +225,6 @@ export const CalculatorMain: React.FC = () => {
                 totalProposal={totalProposal}
               />
 
-              {/* Caixa de Aviso caso não esteja 100% distribuído */}
               {step2Warning && (
                 <div 
                   className="animate-fade-in"
@@ -220,97 +245,146 @@ export const CalculatorMain: React.FC = () => {
                   <span>{step2Warning}</span>
                 </div>
               )}
-
-              {/* Navegação do Step 2 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(1)}
-                  className="btn btn-secondary btn-sm"
-                  style={{ padding: '0.6rem 1rem', fontSize: '0.8rem' }}
-                >
-                  VOLTAR
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleAdvanceToStep3}
-                  className="btn btn-primary btn-sm"
-                  style={{ padding: '0.6rem 1rem', fontSize: '0.8rem' }}
-                >
-                  AVANÇAR
-                </button>
-              </div>
             </div>
           )}
 
-          {/* STEP 3: RESUMO E GERAR PDF */}
-          {currentStep === 3 && (
-            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <div style={{ borderBottom: '1px solid var(--card-border)', paddingBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <Building2 size={20} style={{ color: 'var(--color-primary)' }} />
-                  <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>RESUMO DA PROPOSTA</h2>
+          {currentStep === 3 && (() => {
+            const rawPaid = result.totalPaidBeforeKeys;
+            const percentPaid = Math.min(100, Math.max(0, result.percentagePaidBeforeKeys));
+            const radius = 110;
+            const strokeWidth = 22;
+            const circumference = 2 * Math.PI * radius;
+            const strokeDasharray = `${(percentPaid / 100) * circumference} ${circumference}`;
+
+            const formattedPaidPercent = Number.isInteger(Math.round(percentPaid * 100) / 100)
+              ? `${Math.round(percentPaid)}%`
+              : `${percentPaid.toFixed(2)}%`;
+
+            return (
+              <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {/* Topo do Step 3: VOLTAR + Botão PDF */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem', padding: '0 1rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(2)}
+                    style={navButtonStyle}
+                  >
+                    <ChevronLeft size={18} />
+                    <span>VOLTAR</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleGeneratePDF}
+                    className="btn btn-primary"
+                    style={{ padding: '0.55rem 1.25rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontWeight: 800, borderRadius: '25px', fontSize: '0.85rem', flexShrink: 0 }}
+                    disabled={isGeneratingPDF}
+                  >
+                    <Download size={16} />
+                    <span>{isGeneratingPDF ? 'GERANDO...' : 'PDF'}</span>
+                  </button>
                 </div>
-                <button
-                  onClick={handleResetValues}
-                  className="btn btn-secondary btn-sm"
-                  style={{ fontSize: '0.75rem' }}
-                  title="Zerar todos os campos"
-                >
-                  <RotateCcw size={14} /> RESETAR TUDO
-                </button>
+
+                {/* Gráfico Donut (Tamanho Expandido 340px) */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: '0.75rem 0' }}>
+                  <div style={{ position: 'relative', width: '340px', height: '340px', maxWidth: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="100%" height="100%" viewBox="0 0 270 270" style={{ transform: 'rotate(-90deg)' }}>
+                      {/* Trilha de Fundo do Donut */}
+                      <circle
+                        cx="135"
+                        cy="135"
+                        r={radius}
+                        fill="transparent"
+                        stroke="rgba(219, 255, 201, 0.12)"
+                        strokeWidth={strokeWidth}
+                      />
+                      {/* Segmento Pago (Pantone 902 C) */}
+                      <circle
+                        cx="135"
+                        cy="135"
+                        r={radius}
+                        fill="transparent"
+                        stroke="var(--color-pantone-902c)"
+                        strokeWidth={strokeWidth}
+                        strokeDasharray={strokeDasharray}
+                        strokeLinecap="round"
+                        style={{ transition: 'stroke-dasharray 0.6s ease-in-out' }}
+                      />
+                    </svg>
+
+                    {/* Conteúdo Central do Donut */}
+                    <div style={{ position: 'absolute', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 1rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
+                        Pago até a Entrega
+                      </span>
+                      <strong style={{ fontSize: '1.85rem', fontWeight: 800, color: '#ffffff', lineHeight: 1.2 }}>
+                        {formatBRL(rawPaid)}
+                      </strong>
+                      <span style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--color-pantone-902c)', marginTop: '0.3rem' }}>
+                        {formattedPaidPercent}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Rodapé do Step 3: Chave Seletora + RESETAR TUDO */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', gap: '0.75rem', padding: '0 1rem' }}>
+                  <label 
+                    onClick={() => setIncludeKeysInPercent(!includeKeysInPercent)}
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.6rem', 
+                      cursor: 'pointer', 
+                      userSelect: 'none', 
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      color: 'var(--color-pantone-9580c)',
+                      margin: 0
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '20px',
+                        borderRadius: '12px',
+                        backgroundColor: includeKeysInPercent ? 'var(--color-pantone-902c)' : 'rgba(255, 255, 255, 0.15)',
+                        position: 'relative',
+                        transition: 'background-color 0.25s ease',
+                        cursor: 'pointer',
+                        flexShrink: 0
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          backgroundColor: includeKeysInPercent ? 'rgb(0, 36, 30)' : '#ffffff',
+                          position: 'absolute',
+                          top: '2px',
+                          left: includeKeysInPercent ? '20px' : '2px',
+                          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                        }}
+                      />
+                    </div>
+                    <span>INCLUIR CHAVES</span>
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={handleResetValues}
+                    className="btn btn-primary"
+                    style={{ padding: '0.55rem 1.25rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontWeight: 800, borderRadius: '25px', fontSize: '0.85rem', flexShrink: 0 }}
+                    title="Zerar todos os campos"
+                  >
+                    <RotateCcw size={16} />
+                    <span>REINICIAR</span>
+                  </button>
+                </div>
               </div>
-
-              {/* Dados Gerais */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div style={{ background: 'rgba(0, 25, 21, 0.6)', padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>Preço da Proposta</span>
-                  <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>{formatBRL(result.totalProposal)}</strong>
-                </div>
-
-                <div style={{ background: 'rgba(0, 25, 21, 0.6)', padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>Data de Entrega</span>
-                  <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>{keyDeliveryDate ? formatDateBR(keyDeliveryDate) : 'Não informada'}</strong>
-                </div>
-              </div>
-
-              {/* Resumo dos Lançamentos */}
-              <div style={{ background: 'rgba(0, 25, 21, 0.6)', padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Total Pago até as Chaves:</span>
-                  <strong style={{ color: 'var(--color-primary)' }}>{formatBRL(result.totalPaidBeforeKeys)} ({result.percentagePaidBeforeKeys.toFixed(2)}%)</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Total de Pagamentos Lançados:</span>
-                  <strong>{paymentItems.length} item(ns)</strong>
-                </div>
-              </div>
-
-              {/* Botões do Step 3 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(2)}
-                  className="btn btn-secondary btn-sm"
-                  style={{ padding: '0.6rem 1rem', fontSize: '0.8rem' }}
-                >
-                  VOLTAR
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleGeneratePDF}
-                  className="btn btn-primary"
-                  style={{ padding: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 800 }}
-                  disabled={isGeneratingPDF}
-                >
-                  <FileText size={18} />
-                  <span>{isGeneratingPDF ? 'GERANDO PDF...' : 'BAIXAR PDF DA PROPOSTA'}</span>
-                </button>
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </div>
 

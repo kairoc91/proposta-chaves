@@ -174,55 +174,98 @@ body {
   }
 }
 
-.connected-stepper-bar {
-  display: flex;
-  align-items: stretch;
-  background-color: transparent;
-  border-radius: 25px 25px 0 0;
-  border: none;
-  padding: 10px;
-  gap: 10px;
+/* Stepper com números (1, 2, 3), linha de 1px e texto abaixo */
+.number-stepper-container {
   position: relative;
-  z-index: 2;
-  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  max-width: 360px;
   width: 100%;
+  margin: 0.5rem auto 1.5rem auto;
+  padding: 0;
 }
 
-.step-tab {
-  flex: 1;
+.stepper-line {
+  position: absolute;
+  top: 19px;
+  left: 50px;
+  right: 50px;
+  height: 1px;
+  background-color: var(--color-pantone-9580c);
+  opacity: 0.45;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.step-item {
+  width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  z-index: 2;
+  user-select: none;
+  transition: all 0.25s ease;
+}
+
+.step-number-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--color-pantone-9580c);
+  background-color: rgb(0, 36, 30);
+  color: var(--color-pantone-9580c);
+  font-size: 1.05rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.85rem 0.75rem;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  color: rgb(219, 255, 201); /* Pantone 9580 C */
+  transition: all 0.25s ease;
+}
+
+.step-item.active .step-number-circle {
+  background-color: var(--color-pantone-902c);
+  color: rgb(0, 36, 30);
+  border-color: var(--color-pantone-902c);
+  box-shadow: none;
+  transform: scale(1.1);
+}
+
+.step-number-label {
+  font-size: 0.75rem;
   font-weight: 700;
+  color: var(--color-pantone-9580c);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  background-color: transparent;
-  position: relative;
-  user-select: none;
-  border: 1px solid rgb(219, 255, 201); /* Pantone 9580 C */
+  letter-spacing: 0.05em;
+  opacity: 0.65;
+  transition: all 0.25s ease;
 }
 
-.step-tab.disabled {
-  cursor: not-allowed;
-  color: rgb(219, 255, 201);
-  border-color: rgb(219, 255, 201);
-}
-
-/* Tab Ativa com tom de verde claro (rgb(219, 255, 201)) e border-radius 25px nos 4 cantos */
-.step-tab.active {
-  background-color: rgb(219, 255, 201); /* Pantone 9580 C */
-  color: rgb(0, 36, 30); /* Pantone 5463 C */
+.step-item.active .step-number-label {
+  opacity: 1;
   font-weight: 800;
-  border: 1px solid rgb(219, 255, 201);
-  margin-bottom: 0;
-  z-index: 4;
-  border-radius: 25px;
+  text-shadow: none;
+}
+
+.step-item.disabled {
+  cursor: not-allowed;
+}
+
+.step-item.disabled .step-number-circle {
+  border-color: rgba(219, 255, 201, 0.4);
+  color: rgba(219, 255, 201, 0.4);
+  background-color: rgb(0, 36, 30);
+}
+
+.step-item.disabled .step-number-label {
+  color: rgba(219, 255, 201, 0.4);
 }
 
 /* Painel de Conteúdo Conectado do Step Aberto (Full-Bleed com Padding Interno) */
@@ -231,7 +274,7 @@ body {
   border: none;
   border-radius: 0;
   padding: 1.5rem;
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
   position: relative;
   z-index: 1;
   width: 100%;
@@ -263,7 +306,7 @@ h1, h2, h3 {
   font-size: 0.85rem;
   font-weight: 700;
   padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-md);
+  border-radius: 25px;
   border: none;
   cursor: pointer;
   transition: var(--transition-normal);
@@ -326,7 +369,7 @@ h1, h2, h3 {
 .btn-sm {
   padding: 0.5rem 1rem;
   font-size: 0.85rem;
-  border-radius: var(--radius-sm);
+  border-radius: 25px;
 }
 
 /* Inputs and Forms */
@@ -346,30 +389,51 @@ h1, h2, h3 {
 
 .form-input, .form-select {
   font-family: var(--font-primary);
-  background-color: rgb(0, 25, 21);
-  border: 1px solid var(--card-border);
+  background-color: transparent;
+  border: 1px solid var(--color-pantone-9580c);
   border-radius: 25px;
-  padding: 0.75rem 1rem;
-  color: rgb(151, 255, 102);
+  padding: 0.75rem 2.4rem;
+  color: var(--color-pantone-9580c);
   font-size: 0.95rem;
+  text-align: center;
+  text-align-last: center;
   outline: none;
+  box-shadow: none;
   transition: var(--transition-normal);
   width: 100%;
 }
 
+.form-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
 .form-input:focus, .form-select:focus {
-  border-color: rgb(151, 255, 102);
+  border-color: var(--color-pantone-9580c);
   box-shadow: none;
-  background-color: rgb(0, 25, 21);
+  background-color: transparent;
 }
 
 .form-select option {
   background-color: rgb(0, 36, 30);
-  color: rgb(151, 255, 102);
+  color: var(--color-pantone-9580c);
 }
 
 .form-input::placeholder {
-  color: #4f877b;
+  color: rgba(219, 255, 201, 0.55);
+}
+
+.input-helper-container {
+  position: absolute;
+  right: 0.95rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Remover o ícone nativo do calendário no canto direito de input[type="date"] */

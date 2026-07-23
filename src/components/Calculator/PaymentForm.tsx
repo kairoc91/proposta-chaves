@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { PaymentItem, PaymentCategory, EntryType, RecurrenceType } from '../../utils/calculatorEngine';
 import { formatBRL, parseBRLString, formatDateBR } from '../../utils/formatters';
-import { Plus, Trash2, CalendarDays, Key, AlertCircle, Wallet } from 'lucide-react';
+import { Plus, X, Key, AlertCircle, Wallet } from 'lucide-react';
+import { InputHelper } from './InputHelper';
+import { DateInput } from './DateInput';
 
 interface PaymentFormProps {
   paymentItems: PaymentItem[];
@@ -196,8 +198,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
     onUpdateItem({ ...item, startDate: newDate });
   };
 
-  const itemTotal = item.value * (item.installmentsCount || 1);
-  const itemPercent = totalProposal > 0 ? (itemTotal / totalProposal) * 100 : 0;
+
 
   return (
     <div 
@@ -205,46 +206,69 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
       style={{
         background: 'rgb(0, 36, 30)',
         border: 'none',
-        borderRadius: 'var(--radius-md)',
-        padding: '0.85rem 1rem',
+        borderRadius: '18px',
+        padding: '1rem',
         display: 'flex',
         flexDirection: 'column',
         gap: '0.75rem'
       }}
     >
+      {/* Botão Excluir (X) no Canto Superior Esquerdo */}
+      <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+        <button
+          type="button"
+          onClick={() => onRemoveItem(item.id)}
+          title="Excluir pagamento"
+          aria-label="Excluir pagamento"
+          style={{
+            background: 'rgba(239, 68, 68, 0.12)',
+            border: '1px solid rgba(239, 68, 68, 0.4)',
+            color: '#f87171',
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            padding: 0,
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <X size={14} />
+        </button>
+      </div>
+
       {/* Se for a categoria ENTRADA */}
       {item.category === 'entrada' ? (
         <>
           {/* LINHA 1 (Entrada): Categoria + Modalidade Entrada */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Categoria
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <select 
                 className="form-select" 
                 value={item.category} 
                 onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem' }}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
               >
                 <option value="sinal">Sinal</option>
                 <option value="entrada">Entrada</option>
                 <option value="parcela_intermediaria">Intermediárias</option>
                 <option value="chaves">Chaves</option>
               </select>
+              <div className="input-helper-container">
+                <InputHelper title="Categoria" text="Selecione a categoria de pagamento (Sinal, Entrada, Intermediárias ou Chaves)." />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Modalidade Entrada
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <select 
                 className="form-select" 
                 value={entryType} 
                 onChange={(e) => handleEntryTypeChange(e.target.value as EntryType)}
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem' }}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
               >
                 <option value="dinheiro">Dinheiro</option>
                 <option value="imovel">Imóvel</option>
@@ -252,15 +276,15 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 <option value="servico">Serviço</option>
                 <option value="outros">Outro</option>
               </select>
+              <div className="input-helper-container">
+                <InputHelper title="Modalidade Entrada" text="Escolha a forma de pagamento da entrada (Dinheiro, Imóvel, Veículo, etc.)." />
+              </div>
             </div>
           </div>
 
           {/* LINHA 2 (Entrada): Percentual (%) + Valor (R$) */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Percentual (%)
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 ref={percentInputRef}
                 type="text"
@@ -270,51 +294,45 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 onFocus={setCursorBeforePercent}
                 onClick={setCursorBeforePercent}
                 onKeyUp={setCursorBeforePercent}
-                placeholder="0%"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                placeholder="Percentual (%)"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
+              <div className="input-helper-container">
+                <InputHelper title="Percentual (%)" text="Percentual que esta entrada representa em relação ao preço da proposta." />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Valor (R$)
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 type="text"
                 className="form-input"
                 value={valueStr}
                 onChange={handleValueChange}
-                placeholder="R$ 0,00"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                placeholder="Valor Entrada (R$ 0,00)"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
+              <div className="input-helper-container">
+                <InputHelper title="Valor (R$)" text="Valor total em reais da entrada." />
+              </div>
             </div>
           </div>
 
-          {/* LINHA 3 (Entrada): Vencimento em uma linha sozinho */}
+          {/* LINHA 3 (Entrada): Vencimento */}
           <div className="form-group">
-            <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-              Vencimento
-            </label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <CalendarDays 
-                size={15} 
-                style={{ position: 'absolute', left: '0.65rem', color: 'var(--text-muted)', pointerEvents: 'none' }} 
-              />
-              <input
-                type="date"
+              <DateInput
                 className="form-input"
                 value={startDate}
                 onChange={handleDateChange}
-                onClick={(e) => {
-                  try {
-                    (e.target as HTMLInputElement).showPicker?.();
-                  } catch {}
-                }}
-                style={{ paddingLeft: '2rem', paddingRight: '0.4rem', fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem 0.55rem 2rem' }}
+                placeholder="dd/mm/aaaa"
+                style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
+              <div className="input-helper-container">
+                <InputHelper title="Vencimento" text="Data prevista de pagamento da entrada." />
+              </div>
             </div>
           </div>
         </>
@@ -323,49 +341,46 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
           {/* INTERMEDIÁRIAS LAYOUT */}
           {/* LINHA 1: Categoria + Recorrência */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Categoria
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <select 
                 className="form-select" 
                 value={item.category} 
                 onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem' }}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
               >
                 <option value="sinal">Sinal</option>
                 <option value="entrada">Entrada</option>
                 <option value="parcela_intermediaria">Intermediárias</option>
                 <option value="chaves">Chaves</option>
               </select>
+              <div className="input-helper-container">
+                <InputHelper title="Categoria" text="Selecione a categoria de pagamento." />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Recorrência
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <select 
                 className="form-select" 
                 value={recurrence} 
                 onChange={(e) => handleRecurrenceChange(e.target.value as RecurrenceType)}
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem' }}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
               >
                 <option value="mensal">Mensal</option>
                 <option value="trimestral">Trimestral</option>
                 <option value="semestral">Semestral</option>
                 <option value="anual">Anual</option>
               </select>
+              <div className="input-helper-container">
+                <InputHelper title="Recorrência" text="Frequência de pagamento das parcelas (Mensal, Trimestral, Semestral ou Anual)." />
+              </div>
             </div>
           </div>
 
           {/* LINHA 2: Parcelas (Qtd) + Percentual (%) */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Parcelas (Qtd)
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 type="number"
                 className="form-input"
@@ -373,16 +388,16 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 min={1}
                 max={140}
                 onChange={handleInstallmentsChange}
-                placeholder="1 a 140"
+                placeholder="Qtd. Parcelas (1 a 140)"
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
               />
+              <div className="input-helper-container">
+                <InputHelper title="Qtd. Parcelas" text="Quantidade total de parcelas intermediárias." />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Percentual (%)
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 ref={percentInputRef}
                 type="text"
@@ -392,52 +407,46 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 onFocus={setCursorBeforePercent}
                 onClick={setCursorBeforePercent}
                 onKeyUp={setCursorBeforePercent}
-                placeholder="0%"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                placeholder="Percentual (%)"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
+              <div className="input-helper-container">
+                <InputHelper title="Percentual Total (%)" text="Percentual acumulado do conjunto de parcelas em relação à proposta." />
+              </div>
             </div>
           </div>
 
           {/* LINHA 3: Valor Parcela (R$) + Vencimento */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Valor Parcela
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 type="text"
                 className="form-input"
                 value={valueStr}
                 onChange={handleValueChange}
-                placeholder="R$ 0,00"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                placeholder="Valor Parcela (R$ 0,00)"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
+              <div className="input-helper-container">
+                <InputHelper title="Valor Parcela (R$)" text="Valor de cada parcela intermediária em reais." />
+              </div>
             </div>
 
             <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Vencimento
-              </label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <CalendarDays 
-                  size={15} 
-                  style={{ position: 'absolute', left: '0.65rem', color: 'var(--text-muted)', pointerEvents: 'none' }} 
-                />
-                <input
-                  type="date"
+                <DateInput
                   className="form-input"
                   value={startDate}
                   onChange={handleDateChange}
-                  onClick={(e) => {
-                    try {
-                      (e.target as HTMLInputElement).showPicker?.();
-                    } catch {}
-                  }}
-                  style={{ paddingLeft: '2rem', paddingRight: '0.4rem', fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem 0.55rem 2rem' }}
+                  placeholder="dd/mm/aaaa"
+                  style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
                   disabled={isBlocked}
                 />
+                <div className="input-helper-container">
+                  <InputHelper title="Primeiro Vencimento" text="Data de vencimento da primeira parcela." />
+                </div>
               </div>
             </div>
           </div>
@@ -447,28 +456,25 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
           {/* Sinal e Chaves */}
           {/* LINHA 1: Categoria + Percentual (%) */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Categoria
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <select 
                 className="form-select" 
                 value={item.category} 
                 onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem' }}
+                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
               >
                 <option value="sinal">Sinal</option>
                 <option value="entrada">Entrada</option>
                 <option value="parcela_intermediaria">Intermediárias</option>
                 <option value="chaves">Chaves</option>
               </select>
+              <div className="input-helper-container">
+                <InputHelper title="Categoria" text="Selecione a categoria do pagamento." />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Percentual (%)
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 ref={percentInputRef}
                 type="text"
@@ -478,58 +484,57 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 onFocus={setCursorBeforePercent}
                 onClick={setCursorBeforePercent}
                 onKeyUp={setCursorBeforePercent}
-                placeholder="0%"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                placeholder="Percentual (%)"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
+              <div className="input-helper-container">
+                <InputHelper title="Percentual (%)" text="Percentual que este item representa na proposta." />
+              </div>
             </div>
           </div>
 
           {/* LINHA 2: Valor (R$) + Data de Vencimento / Entrega */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Valor (R$)
-              </label>
+            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 type="text"
                 className="form-input"
                 value={valueStr}
                 onChange={handleValueChange}
-                placeholder="R$ 0,00"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.65rem' }}
+                placeholder="Valor (R$ 0,00)"
+                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
+              <div className="input-helper-container">
+                <InputHelper title="Valor (R$)" text="Valor total em reais do pagamento." />
+              </div>
             </div>
 
             <div className="form-group">
-              <label style={{ fontSize: 'clamp(0.65rem, 2.4vw, 0.75rem)', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Vencimento
-              </label>
               {item.category === 'chaves' ? (
-                <div style={{ fontSize: 'clamp(0.75rem, 2.8vw, 0.85rem)', color: 'var(--color-primary)', background: 'var(--color-success-bg)', border: '1px solid var(--color-success-border)', padding: '0.55rem 0.5rem', borderRadius: 'var(--radius-md)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Key size={14} />
-                  <span>{keyDeliveryDate ? formatDateBR(keyDeliveryDate) : 'Na Entrega'}</span>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <div style={{ width: '100%', fontSize: 'clamp(0.75rem, 2.8vw, 0.85rem)', color: 'var(--color-primary)', background: 'var(--color-success-bg)', border: '1px solid var(--color-success-border)', padding: '0.55rem 2.4rem', borderRadius: 'var(--radius-md)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                    <Key size={14} />
+                    <span>{keyDeliveryDate ? formatDateBR(keyDeliveryDate) : 'Na Entrega'}</span>
+                  </div>
+                  <div className="input-helper-container">
+                    <InputHelper title="Vencimento" text="Data automática definida pelas chaves." />
+                  </div>
                 </div>
               ) : (
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <CalendarDays 
-                    size={15} 
-                    style={{ position: 'absolute', left: '0.65rem', color: 'var(--text-muted)', pointerEvents: 'none' }} 
-                  />
-                  <input
-                    type="date"
+                  <DateInput
                     className="form-input"
                     value={startDate}
                     onChange={handleDateChange}
-                    onClick={(e) => {
-                      try {
-                        (e.target as HTMLInputElement).showPicker?.();
-                      } catch {}
-                    }}
-                    style={{ paddingLeft: '2rem', paddingRight: '0.4rem', fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 0.5rem 0.55rem 2rem' }}
+                    placeholder="dd/mm/aaaa"
+                    style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
                     disabled={isBlocked}
                   />
+                  <div className="input-helper-container">
+                    <InputHelper title="Vencimento" text="Data de vencimento do sinal." />
+                  </div>
                 </div>
               )}
             </div>
@@ -537,42 +542,6 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
         </>
       )}
 
-      {/* Linha Inferior: Subtotal (Esquerda) + Excluir (Direita) */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        paddingTop: '0.5rem', 
-        marginTop: '0.2rem',
-        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-        fontSize: '0.8rem'
-      }}>
-        {/* Esquerda: Subtotal + % */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <span style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-            Subtotal: {formatBRL(itemTotal)}
-          </span>
-          {itemPercent > 0 && (
-            <span style={{ color: 'var(--color-primary)', fontWeight: 700, background: 'var(--color-success-bg)', padding: '0.15rem 0.45rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-success-border)', fontSize: '0.75rem' }}>
-              {Number.isInteger(Math.round(itemPercent * 100) / 100)
-                ? `${Math.round(itemPercent)}%`
-                : `${(Math.round(itemPercent * 100) / 100)}%`}
-            </span>
-          )}
-        </div>
-
-        {/* Direita: Botão Excluir */}
-        <button
-          type="button"
-          onClick={() => onRemoveItem(item.id)}
-          className="btn btn-danger btn-sm"
-          style={{ padding: '0.4rem 0.65rem', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem' }}
-          title="Excluir pagamento"
-        >
-          <Trash2 size={14} />
-          <span>Excluir</span>
-        </button>
-      </div>
     </div>
   );
 };
@@ -603,6 +572,12 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     setPaymentItems((prev) => [newPaymentItem, ...prev]);
   };
 
+  useEffect(() => {
+    if (!isBlocked && paymentItems.length === 0) {
+      handleAddPaymentRow();
+    }
+  }, [isBlocked, paymentItems.length]);
+
   const handleUpdateItem = (updatedItem: PaymentItem) => {
     setPaymentItems((prev) => prev.map((item) => (item.id === updatedItem.id ? updatedItem : item)));
   };
@@ -611,19 +586,30 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     setPaymentItems((prev) => prev.filter((item) => item.id !== id));
   };
 
+  const totalItemsSum = paymentItems.reduce((acc, item) => acc + (item.value * (item.installmentsCount || 1)), 0);
+  const launchedPercent = totalProposal > 0 ? (totalItemsSum / totalProposal) * 100 : 0;
+  const roundedLaunchedPercent = Math.round(launchedPercent * 100) / 100;
+  const formattedLaunchedPercent = Number.isInteger(roundedLaunchedPercent)
+    ? `${roundedLaunchedPercent}%`
+    : `${roundedLaunchedPercent.toFixed(2)}%`;
+
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      {/* Botão de Adicionar Pagamento no Topo */}
+      {/* Botão de Adicionar Pagamento + Subtotal no Topo */}
       {!isBlocked && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.25rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem', padding: '0 1rem' }}>
           <button
             type="button"
             onClick={handleAddPaymentRow}
             className="btn btn-primary btn-sm"
             style={{ fontSize: '0.85rem', padding: '0.55rem 1.1rem', borderRadius: '25px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
           >
-            <Plus size={16} /> ADICIONAR PAGAMENTO
+            <Plus size={16} /> ADICIONAR
           </button>
+
+          <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--color-pantone-9580c)', letterSpacing: '0.02em' }}>
+            Subtotal {formatBRL(totalItemsSum)} ({formattedLaunchedPercent})
+          </div>
         </div>
       )}
 
