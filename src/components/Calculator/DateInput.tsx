@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { Calendar } from 'lucide-react';
 
 export interface DateInputProps {
   id?: string;
@@ -85,8 +86,50 @@ export const DateInput: React.FC<DateInputProps> = ({
     onChange(e);
   };
 
+  const openCalendarPicker = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (disabled) return;
+    try {
+      if (hiddenDateRef.current) {
+        if (typeof hiddenDateRef.current.showPicker === 'function') {
+          hiddenDateRef.current.showPicker();
+        } else {
+          hiddenDateRef.current.click();
+        }
+      }
+    } catch {}
+  };
+
   return (
     <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
+      <button
+        type="button"
+        onClick={openCalendarPicker}
+        disabled={disabled}
+        tabIndex={-1}
+        title="Abrir calendário para selecionar a data"
+        aria-label="Abrir calendário para selecionar a data"
+        style={{
+          position: 'absolute',
+          left: '0.85rem',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          background: 'none',
+          border: 'none',
+          padding: 0,
+          margin: 0,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          color: 'var(--color-pantone-9580c)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 5,
+        }}
+      >
+        <Calendar size={18} />
+      </button>
+
       <input
         id={id}
         name={name}
@@ -98,7 +141,10 @@ export const DateInput: React.FC<DateInputProps> = ({
         onChange={handleTextChange}
         disabled={disabled}
         required={required}
-        style={style}
+        style={{
+          paddingLeft: '2.5rem',
+          ...style,
+        }}
       />
       <input
         ref={hiddenDateRef}
@@ -111,11 +157,12 @@ export const DateInput: React.FC<DateInputProps> = ({
           position: 'absolute',
           opacity: 0,
           pointerEvents: 'none',
-          width: 0,
-          height: 0,
+          width: '1px',
+          height: '1px',
           border: 0,
-          bottom: 0,
-          left: 0,
+          top: '50%',
+          left: '0.85rem',
+          transform: 'translateY(-50%)',
         }}
       />
     </div>
