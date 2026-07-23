@@ -48,73 +48,77 @@ export async function generateProposalPDF({
   const unlaunchedSum = Math.max(0, totalProposal - totalItemsSum);
   const unlaunchedPercent = Math.max(0, 100 - launchedPercent);
 
-  // 2. Montar o conteúdo HTML da folha de PDF alinhado à esquerda
+  // 2. Montar o conteúdo HTML da folha de PDF alinhado à esquerda com tamanho de texto padronizado (11px)
   pdfContainer.innerHTML = `
-    <!-- Cabeçalho Alinhado à Esquerda: PROPOSTA -->
-    <div style="border-bottom: 2px solid #111827; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
-      <h1 style="font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: #111827; margin: 0; text-align: left;">
-        PROPOSTA
-      </h1>
-      <div style="font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; text-align: left;">
-        Emissão: ${todayStr}
+    <!-- Cabeçalho: Logo Infinity na esquerda, Título PROPOSTA na direita -->
+    <div style="border-bottom: 2px solid #111827; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+      <!-- Logo Infinity na esquerda -->
+      <img src="/logo-infinity7.png" alt="Infinity 7 Logo" style="height: 38px; width: auto; object-fit: contain;" />
+      
+      <!-- Título PROPOSTA e Data de Emissão na direita -->
+      <div style="text-align: right;">
+        <h1 style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: #111827; margin: 0 0 3px 0;">
+          PROPOSTA
+        </h1>
+        <div style="font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase;">
+          Emissão: ${todayStr}
+        </div>
       </div>
     </div>
 
-    <!-- Tabela 1: Resumo da Proposta e Indicadores (Alinhado à Esquerda) -->
-    <div style="margin-bottom: 30px;">
-      <h2 style="font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #111827; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px; text-align: left;">
-        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #111827; display: inline-block;"></span>
+    <!-- Tabela 1: Resumo da Proposta e Indicadores -->
+    <div style="margin-bottom: 25px;">
+      <h2 style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #111827; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px; text-align: left;">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #111827; display: inline-block;"></span>
         Resumo da Proposta
       </h2>
       <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 6px; overflow: hidden; border: 1px solid #d1d5db;">
         <thead>
           <tr style="background-color: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
-            <th style="padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151;">Preço da Proposta</th>
-            <th style="padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151;">Data de Entrega</th>
-            <th style="padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #047857;">Até a Entrega</th>
-            <th style="padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4b5563;">Após Entrega (Saldo/Chaves)</th>
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151;">Preço da Proposta</th>
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151;">Data de Entrega</th>
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #047857;">Até a Entrega</th>
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4b5563;">Após Entrega (Saldo/Chaves)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td style="padding: 14px 16px; text-align: left; font-size: 16px; font-weight: 800; color: #111827;">${formatBRL(totalProposal)}</td>
-            <td style="padding: 14px 16px; text-align: left; font-size: 14px; font-weight: 600; color: #111827;">${keyDeliveryDate ? formatDateBR(keyDeliveryDate) : 'Não informada'}</td>
-            <td style="padding: 14px 16px; text-align: left; font-size: 15px; font-weight: 800; color: #047857;">
-              ${formatBRL(result.totalPaidBeforeKeys)}
-              <div style="font-size: 11px; font-weight: 600; text-align: left;">(${result.percentagePaidBeforeKeys.toFixed(2)}%)</div>
+            <td style="padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #111827;">${formatBRL(totalProposal)}</td>
+            <td style="padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 600; color: #111827;">${keyDeliveryDate ? formatDateBR(keyDeliveryDate) : 'Não informada'}</td>
+            <td style="padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #047857;">
+              ${formatBRL(result.totalPaidBeforeKeys)} (${result.percentagePaidBeforeKeys.toFixed(2)}%)
             </td>
-            <td style="padding: 14px 16px; text-align: left; font-size: 15px; font-weight: 800; color: #4b5563;">
-              ${formatBRL(result.totalPaidAfterKeys)}
-              <div style="font-size: 11px; font-weight: 600; text-align: left;">(${(totalProposal > 0 ? (result.totalPaidAfterKeys / totalProposal) * 100 : 0).toFixed(2)}%)</div>
+            <td style="padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 700; color: #4b5563;">
+              ${formatBRL(result.totalPaidAfterKeys)} (${(totalProposal > 0 ? (result.totalPaidAfterKeys / totalProposal) * 100 : 0).toFixed(2)}%)
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Tabela 2: Cronograma Detalhado dos Lançamentos (Alinhado à Esquerda) -->
+    <!-- Tabela 2: Cronograma Detalhado dos Lançamentos -->
     <div>
-      <h2 style="font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #111827; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px; text-align: left;">
-        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #111827; display: inline-block;"></span>
+      <h2 style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #111827; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px; text-align: left;">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #111827; display: inline-block;"></span>
         Cronograma de Lançamentos
       </h2>
       <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 6px; overflow: hidden; border: 1px solid #d1d5db;">
         <thead>
           <tr style="background-color: #f3f4f6; border-bottom: 2px solid #e5e7eb;">
-            <th style="padding: 10px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151; width: 30px;">#</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151; width: 110px;">Modalidade</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151;">Descrição</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151; width: 65px;">Qtd</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151; width: 90px;">Vencimento</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151; width: 110px;">Valor Unit.</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #374151; width: 110px;">Subtotal</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #047857; width: 65px;">% Prop.</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151; width: 30px;">#</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151; width: 110px;">Modalidade</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151;">Descrição</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151; width: 65px;">Qtd</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151; width: 90px;">Vencimento</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151; width: 110px;">Valor Unit.</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #374151; width: 110px;">Subtotal</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #047857; width: 65px;">% Prop.</th>
           </tr>
         </thead>
         <tbody>
           ${
             paymentItems.length === 0
-              ? `<tr><td colspan="8" style="padding: 24px; text-align: left; color: #6b7280; font-size: 12px;">Nenhum pagamento cadastrado na proposta</td></tr>`
+              ? `<tr><td colspan="8" style="padding: 20px; text-align: left; color: #6b7280; font-size: 11px;">Nenhum pagamento cadastrado na proposta</td></tr>`
               : paymentItems.map((item, idx) => {
                   const itemTotal = item.value * item.installmentsCount;
                   const itemPercent = totalProposal > 0 ? (itemTotal / totalProposal) * 100 : 0;
@@ -146,15 +150,15 @@ export async function generateProposalPDF({
                     <tr style="background-color: ${isEven ? '#f9fafb' : '#ffffff'}; border-bottom: 1px solid #e5e7eb;">
                       <td style="padding: 10px 12px; text-align: left; font-size: 11px; color: #6b7280; font-weight: 600;">${idx + 1}</td>
                       <td style="padding: 10px 12px; text-align: left;">
-                        <span style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 4px; background-color: #111827; color: #ffffff; display: inline-block;">
+                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 4px; background-color: #111827; color: #ffffff; display: inline-block;">
                           ${getCategoryLabel(item.category)}
                         </span>
                       </td>
-                      <td style="padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 600; color: #111827;">${getPDFItemDescription(item)}</td>
+                      <td style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; color: #111827;">${getPDFItemDescription(item)}</td>
                       <td style="padding: 10px 12px; text-align: left; font-size: 11px; color: #4b5563;">${item.installmentsCount > 1 ? `${item.installmentsCount}x` : '1x'}</td>
                       <td style="padding: 10px 12px; text-align: left; font-size: 11px; color: #4b5563;">${formatDateBR(item.startDate)}</td>
                       <td style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; color: #4b5563;">${formatBRL(item.value)}</td>
-                      <td style="padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 700; color: #111827;">${formatBRL(itemTotal)}</td>
+                      <td style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #111827;">${formatBRL(itemTotal)}</td>
                       <td style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #047857;">${itemPercent.toFixed(2)}%</td>
                     </tr>
                   `;
@@ -163,23 +167,23 @@ export async function generateProposalPDF({
         </tbody>
         <tfoot>
           <tr style="background-color: #f3f4f6; border-top: 2px solid #111827;">
-            <td colspan="6" style="padding: 12px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #111827; text-align: left;">Total Lançado:</td>
-            <td style="padding: 12px 16px; font-size: 13px; font-weight: 800; color: #047857; text-align: left;">${formatBRL(totalItemsSum)}</td>
-            <td style="padding: 12px 16px; font-size: 12px; font-weight: 800; color: #047857; text-align: left;">${launchedPercent.toFixed(2)}%</td>
+            <td colspan="6" style="padding: 10px 14px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #111827; text-align: left;">Total Lançado:</td>
+            <td style="padding: 10px 14px; font-size: 11px; font-weight: 800; color: #047857; text-align: left;">${formatBRL(totalItemsSum)}</td>
+            <td style="padding: 10px 14px; font-size: 11px; font-weight: 800; color: #047857; text-align: left;">${launchedPercent.toFixed(2)}%</td>
           </tr>
           ${unlaunchedSum > 0 ? `
             <tr style="background-color: #ffffff;">
-              <td colspan="6" style="padding: 10px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b7280; text-align: left;">Saldo Não Lançado:</td>
-              <td style="padding: 10px 16px; font-size: 12px; font-weight: 700; color: #6b7280; text-align: left;">${formatBRL(unlaunchedSum)}</td>
-              <td style="padding: 10px 16px; font-size: 11px; font-weight: 700; color: #6b7280; text-align: left;">${unlaunchedPercent.toFixed(2)}%</td>
+              <td colspan="6" style="padding: 10px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6b7280; text-align: left;">Saldo Não Lançado:</td>
+              <td style="padding: 10px 14px; font-size: 11px; font-weight: 700; color: #6b7280; text-align: left;">${formatBRL(unlaunchedSum)}</td>
+              <td style="padding: 10px 14px; font-size: 11px; font-weight: 700; color: #6b7280; text-align: left;">${unlaunchedPercent.toFixed(2)}%</td>
             </tr>
           ` : ''}
         </tfoot>
       </table>
     </div>
 
-    <!-- Rodapé Alinhado à Esquerda -->
-    <div style="margin-top: 35px; text-align: left; border-top: 1px solid #e5e7eb; padding-top: 15px; font-size: 10px; color: #9ca3af;">
+    <!-- Rodapé -->
+    <div style="margin-top: 30px; text-align: left; border-top: 1px solid #e5e7eb; padding-top: 12px; font-size: 11px; color: #9ca3af;">
       Proposta gerada automaticamente em ${todayStr}
     </div>
   `;
