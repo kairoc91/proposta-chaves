@@ -574,7 +574,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 }
 
-/* Item de pagamento responsivo que empilha no mobile */
+/* Item de pagamento responsivo */
 .payment-list-item {
   display: flex;
   flex-direction: column;
@@ -584,119 +584,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background: rgb(0, 36, 30);
   border: none;
   animation: fadeIn 0.3s ease forwards;
-}
-
-@media (min-width: 500px) {
-  .payment-list-item {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-  }
-}
-
-.payment-item-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  padding-top: 0.75rem;
-  margin-top: 0.25rem;
-}
-
-@media (min-width: 500px) {
-  .payment-item-actions {
-    width: auto;
-    border-top: none;
-    padding-top: 0;
-    margin-top: 0;
-    gap: 1rem;
-  }
-}
-
-/* Dashboard Grid - 2 Colunas em Linha */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-  width: 100%;
-}
-
-.dashboard-card {
-  padding: 0.5rem 0.25rem !important;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-@media (min-width: 768px) {
-  .dashboard-grid {
-    gap: 1.5rem;
-  }
-  .dashboard-card {
-    padding: 1.25rem !important;
-  }
-}
-
-.donut-center-text {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 0.25rem;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.donut-main-val {
-  font-size: clamp(0.95rem, 3.8vw, 1.45rem);
-  font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1.1;
-}
-
-.donut-sub-val {
-  font-size: clamp(0.7rem, 2.6vw, 0.95rem);
-  font-weight: 700;
-  color: var(--text-secondary);
-  line-height: 1.1;
-}
-
-.donut-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  color: var(--text-secondary);
-  font-size: clamp(0.75rem, 2.8vw, 1.05rem);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-/* Print / PDF Export Styles */
-@media print {
-  body {
-    background: #121212 !important;
-    color: #ffffff !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  .btn, button, .no-print {
-    display: none !important;
-  }
-
-  .glass-card {
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    background: #1a1a1a !important;
-  }
 }
 
 
