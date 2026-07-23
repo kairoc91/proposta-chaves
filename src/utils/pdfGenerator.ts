@@ -216,28 +216,29 @@ export async function generateProposalPDF({
       heightLeft -= pdfHeight;
     }
 
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && window.innerWidth <= 1024);
+    const pdfBlob = pdf.output('blob');
+    const pdfFile = new File([pdfBlob], 'proposta.pdf', { type: 'application/pdf' });
 
-    if (isMobile) {
-      const pdfBlob = pdf.output('blob');
-      const pdfFile = new File([pdfBlob], 'proposta.pdf', { type: 'application/pdf' });
-
-      if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-        try {
+    // Tentar usar o menu nativo de compartilhamento do celular
+    if (typeof navigator.share === 'function') {
+      try {
+        // Testar primeiro se o navegador aceita compartilhar o arquivo PDF diretamente
+        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
           await navigator.share({
             files: [pdfFile],
             title: 'Proposta Comercial',
             text: 'Segue a proposta comercial em PDF.',
           });
           return;
-        } catch (shareError) {
-          if (shareError instanceof Error && shareError.name === 'AbortError') {
-            return;
-          }
+        }
+      } catch (shareError) {
+        if (shareError instanceof Error && shareError.name === 'AbortError') {
+          return; // Usuário simplesmente cancelou a janela de compartilhamento
         }
       }
     }
 
+    // Fallback: Se não suportar compartilhamento de arquivos, faz o download do arquivo PDF
     pdf.save('proposta.pdf');
   } finally {
     // Limpar o container temporário
