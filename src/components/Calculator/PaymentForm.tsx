@@ -162,22 +162,37 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
   };
 
   const handleInstallmentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const countVal = parseInt(e.target.value, 10);
-    const validCount = isNaN(countVal) || countVal < 1 ? 1 : countVal;
-    setInstallmentsCount(validCount);
-
-    if (percentStr && totalProposal > 0) {
-      const p = parseFloat(percentStr);
-      if (!isNaN(p) && p > 0) {
-        const totalGroupVal = (p / 100) * totalProposal;
-        const valPerInst = totalGroupVal / validCount;
-        setValueStr(formatBRL(valPerInst));
-        onUpdateItem({ ...item, installmentsCount: validCount, value: valPerInst });
-        return;
-      }
+    const raw = e.target.value;
+    if (raw === '') {
+      setInstallmentsCount(0);
+      return;
     }
 
-    onUpdateItem({ ...item, installmentsCount: validCount });
+    const countVal = parseInt(raw, 10);
+    if (!isNaN(countVal)) {
+      setInstallmentsCount(countVal);
+
+      if (countVal >= 1) {
+        if (percentStr && totalProposal > 0) {
+          const p = parseFloat(percentStr);
+          if (!isNaN(p) && p > 0) {
+            const totalGroupVal = (p / 100) * totalProposal;
+            const valPerInst = totalGroupVal / countVal;
+            setValueStr(formatBRL(valPerInst));
+            onUpdateItem({ ...item, installmentsCount: countVal, value: valPerInst });
+            return;
+          }
+        }
+        onUpdateItem({ ...item, installmentsCount: countVal });
+      }
+    }
+  };
+
+  const handleInstallmentsBlur = () => {
+    if (!installmentsCount || installmentsCount < 1) {
+      setInstallmentsCount(1);
+      onUpdateItem({ ...item, installmentsCount: 1 });
+    }
   };
 
   const handleRecurrenceChange = (newRec: RecurrenceType) => {
@@ -388,6 +403,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 min={1}
                 max={140}
                 onChange={handleInstallmentsChange}
+                onBlur={handleInstallmentsBlur}
                 placeholder="Qtd. Parcelas (1 a 140)"
                 disabled={isBlocked}
                 style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
@@ -574,7 +590,14 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 
   useEffect(() => {
     if (!isBlocked && paymentItems.length === 0) {
-      handleAddPaymentRow();
+      setPaymentItems([{
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        category: 'sinal',
+        description: 'Sinal de Reserva',
+        value: 0,
+        installmentsCount: 1,
+        startDate: new Date().toISOString().split('T')[0],
+      }]);
     }
   }, [isBlocked, paymentItems.length]);
 
