@@ -5,7 +5,7 @@ import { ConfigForm } from './ConfigForm';
 import { PaymentForm } from './PaymentForm';
 import { generateProposalPDF } from '../../utils/pdfGenerator';
 import { formatBRL } from '../../utils/formatters';
-import { Download, RotateCcw, AlertTriangle, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Download, RotateCcw, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 
 export const CalculatorMain: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -77,20 +77,12 @@ export const CalculatorMain: React.FC = () => {
     }
 
     if (totalItemsSum < totalProposal) {
-      const remainingAmount = totalProposal - totalItemsSum;
-      const remainingPercent = (remainingAmount / totalProposal) * 100;
-      const roundedPercent = Math.round(remainingPercent * 100) / 100;
-      const formattedPercent = Number.isInteger(roundedPercent) ? `${roundedPercent}%` : `${roundedPercent.toFixed(2)}%`;
-      setStep2Warning(`Atenção: É necessário distribuir 100% do preço da proposta. Faltam ${formatBRL(remainingAmount)} (${formattedPercent}) a serem lançados.`);
+      setStep2Warning('Valor inferior ao total');
       return;
     }
 
     if (totalItemsSum > totalProposal) {
-      const excessAmount = totalItemsSum - totalProposal;
-      const excessPercent = (excessAmount / totalProposal) * 100;
-      const roundedPercent = Math.round(excessPercent * 100) / 100;
-      const formattedPercent = Number.isInteger(roundedPercent) ? `${roundedPercent}%` : `${roundedPercent.toFixed(2)}%`;
-      setStep2Warning(`Atenção: O valor total dos pagamentos ultrapassa o preço da proposta em ${formatBRL(excessAmount)} (${formattedPercent}). Ajuste os valores para avançar.`);
+      setStep2Warning('Valor excede ao total');
       return;
     }
 
@@ -264,28 +256,8 @@ export const CalculatorMain: React.FC = () => {
                 setPaymentItems={setPaymentItems}
                 keyDeliveryDate={keyDeliveryDate}
                 totalProposal={totalProposal}
+                step2Warning={step2Warning}
               />
-
-              {step2Warning && (
-                <div 
-                  className="animate-fade-in"
-                  style={{
-                    background: 'rgba(239, 68, 68, 0.12)',
-                    border: '1px solid rgba(239, 68, 68, 0.4)',
-                    color: '#f87171',
-                    padding: '0.85rem 1rem',
-                    borderRadius: 'var(--radius-md)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    fontSize: '0.85rem',
-                    fontWeight: 600
-                  }}
-                >
-                  <AlertTriangle size={22} style={{ flexShrink: 0 }} />
-                  <span>{step2Warning}</span>
-                </div>
-              )}
             </div>
           )}
 

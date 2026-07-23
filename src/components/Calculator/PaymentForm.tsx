@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { PaymentItem, PaymentCategory, EntryType, RecurrenceType } from '../../utils/calculatorEngine';
 import { formatBRL, parseBRLString, formatDateBR } from '../../utils/formatters';
-import { Plus, X, Key, AlertCircle, Wallet } from 'lucide-react';
+import { Plus, X, Key, AlertCircle, AlertTriangle, Wallet } from 'lucide-react';
 import { DateInput } from './DateInput';
 
 interface PaymentFormProps {
@@ -9,6 +9,7 @@ interface PaymentFormProps {
   setPaymentItems: React.Dispatch<React.SetStateAction<PaymentItem[]>>;
   keyDeliveryDate: string;
   totalProposal: number;
+  step2Warning?: string | null;
 }
 
 interface PaymentRowItemProps {
@@ -122,17 +123,26 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
-    const numeric = parseBRLString(raw);
-    setValueStr(numeric > 0 ? formatBRL(numeric) : '');
+    let numeric = parseBRLString(raw);
 
     if (numeric > 0 && totalProposal > 0) {
       const count = item.category === 'parcela_intermediaria' ? Math.max(1, installmentsCount) : 1;
+      const maxAllowedValuePerInst = totalProposal / count;
+      if (numeric > maxAllowedValuePerInst) {
+        numeric = maxAllowedValuePerInst;
+        window.alert('Valor excede ao total');
+      }
+
+      setValueStr(formatBRL(numeric));
       const totalGroupVal = numeric * count;
       const p = (totalGroupVal / totalProposal) * 100;
       const rounded = Math.round(p * 100) / 100;
       setPercentStr(rounded > 0 ? String(rounded) : '');
-    } else if (numeric === 0) {
-      setPercentStr('');
+    } else {
+      setValueStr(numeric > 0 ? formatBRL(numeric) : '');
+      if (numeric === 0) {
+        setPercentStr('');
+      }
     }
 
     onUpdateItem({ ...item, value: numeric });
@@ -145,9 +155,15 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
     const parts = raw.split('.');
     if (parts.length > 2) raw = parts[0] + '.' + parts.slice(1).join('');
 
+    let p = parseFloat(raw);
+    if (!isNaN(p) && p > 100) {
+      p = 100;
+      raw = '100';
+      window.alert('Valor excede ao total');
+    }
+
     setPercentStr(raw);
 
-    const p = parseFloat(raw);
     if (!isNaN(p) && p > 0 && totalProposal > 0) {
       const count = item.category === 'parcela_intermediaria' ? Math.max(1, installmentsCount) : 1;
       const totalGroupVal = (p / 100) * totalProposal;
@@ -532,6 +548,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
   setPaymentItems,
   keyDeliveryDate,
   totalProposal,
+  step2Warning,
 }) => {
   const isBlocked = !totalProposal || !keyDeliveryDate;
 
@@ -586,18 +603,43 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
       {/* Botão de Adicionar Pagamento + Subtotal no Topo */}
       {!isBlocked && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem', padding: '0 1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', color: '#DBFFC9', letterSpacing: '0.02em' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase' }}>SUBTOTAL</span>
+            <span style={{ fontSize: '0.95rem', fontWeight: 800 }}>{formatBRL(totalItemsSum)} ({formattedLaunchedPercent})</span>
+          </div>
+
           <button
             type="button"
             onClick={handleAddPaymentRow}
             className="btn btn-primary btn-sm"
             style={{ fontSize: '0.85rem', padding: '0.55rem 1.1rem', borderRadius: '15px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
           >
-            <Plus size={16} /> ADICIONAR
+            ADICIONAR
           </button>
+        </div>
+      )}
 
-          <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#DBFFC9', letterSpacing: '0.02em' }}>
-            Subtotal {formatBRL(totalItemsSum)} ({formattedLaunchedPercent})
-          </div>
+      {/* Banner de Aviso de Validação (Valor excede ao total / Valor inferior ao total) */}
+      {!isBlocked && step2Warning && (
+        <div className="animate-fade-in" style={{ 
+          fontSize: '0.85rem', 
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em',
+          color: '#f87171', 
+          background: 'rgba(239, 68, 68, 0.12)', 
+          padding: '0.85rem 1.1rem', 
+          borderRadius: '15px', 
+          border: '1px solid rgba(239, 68, 68, 0.4)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          textAlign: 'center',
+          gap: '0.6rem',
+          margin: '0 0.5rem'
+        }}>
+          <AlertTriangle size={18} style={{ color: '#f87171', flexShrink: 0 }} />
+          <span>{step2Warning}</span>
         </div>
       )}
 
