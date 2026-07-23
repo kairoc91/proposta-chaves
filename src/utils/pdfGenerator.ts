@@ -78,10 +78,10 @@ export async function generateProposalPDF({
       <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 6px; overflow: hidden; border: 1px solid #00241E;">
         <thead>
           <tr style="background-color: #00241E; border-bottom: 1px solid #00241E;">
-            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66;">Preço da Proposta</th>
-            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66;">Data de Entrega</th>
-            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66;">Até a Entrega</th>
-            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66;">Após Entrega</th>
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9;">Preço da Proposta</th>
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9;">Data de Entrega</th>
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9;">Até a Entrega</th>
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9;">Após Entrega</th>
           </tr>
         </thead>
         <tbody>
@@ -108,14 +108,14 @@ export async function generateProposalPDF({
       <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 6px; overflow: hidden; border: 1px solid #00241E;">
         <thead>
           <tr style="background-color: #00241E; border-bottom: 1px solid #00241E;">
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66; width: 30px;">#</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66; width: 110px;">Modalidade</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66;">Descrição</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66; width: 65px;">Qtd</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66; width: 90px;">Vencimento</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66; width: 110px;">Valor un.</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66; width: 110px;">Subtotal</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #97FF66; width: 65px;">(%)</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 30px;">#</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 110px;">Modalidade</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9;">Descrição</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 65px;">Qtd</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 90px;">Vencimento</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 110px;">Valor un.</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 110px;">Subtotal</th>
+            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 65px;">(%)</th>
           </tr>
         </thead>
         <tbody>
