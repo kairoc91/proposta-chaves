@@ -28,7 +28,7 @@ export const CalculatorMain: React.FC = () => {
   const navButtonStyle: React.CSSProperties = {
     background: 'none',
     border: 'none',
-    color: 'var(--color-pantone-9580c)',
+    color: '#DBFFC9',
     fontSize: '0.85rem',
     fontWeight: 800,
     display: 'inline-flex',
@@ -318,7 +318,7 @@ export const CalculatorMain: React.FC = () => {
                     type="button"
                     onClick={handleGeneratePDF}
                     className="btn btn-primary"
-                    style={{ padding: '0.55rem 1.25rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontWeight: 800, borderRadius: '25px', fontSize: '0.85rem', flexShrink: 0 }}
+                    style={{ padding: '0.55rem 1.25rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontWeight: 800, borderRadius: '15px', fontSize: '0.85rem', flexShrink: 0 }}
                     disabled={isGeneratingPDF}
                   >
                     <Download size={16} />

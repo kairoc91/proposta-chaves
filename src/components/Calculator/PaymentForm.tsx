@@ -227,17 +227,17 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
         gap: '0.75rem'
       }}
     >
-      {/* Botão Excluir (X) no Canto Superior Esquerdo */}
-      <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+      {/* Botão Excluir (X) no Canto Superior Direito */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
         <button
           type="button"
           onClick={() => onRemoveItem(item.id)}
           title="Excluir pagamento"
           aria-label="Excluir pagamento"
           style={{
-            background: 'rgba(239, 68, 68, 0.12)',
-            border: '1px solid rgba(239, 68, 68, 0.4)',
-            color: '#f87171',
+            background: '#97FF66',
+            border: 'none',
+            color: 'rgb(0, 36, 30)',
             width: '24px',
             height: '24px',
             borderRadius: '50%',
@@ -249,7 +249,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
             transition: 'all 0.2s ease',
           }}
         >
-          <X size={14} />
+          <X size={14} strokeWidth={2.5} />
         </button>
       </div>
 
@@ -265,7 +265,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={item.category} 
                 onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
                 disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 0.75rem' }}
               >
                 <option value="sinal">Sinal</option>
                 <option value="entrada">Entrada</option>
@@ -281,7 +281,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={entryType} 
                 onChange={(e) => handleEntryTypeChange(e.target.value as EntryType)}
                 disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 0.75rem' }}
               >
                 <option value="dinheiro">Dinheiro</option>
                 <option value="imovel">Imóvel</option>
@@ -307,7 +307,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 onClick={setCursorBeforePercent}
                 onKeyUp={setCursorBeforePercent}
                 placeholder="0%"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 0.75rem' }}
                 disabled={isBlocked}
               />
             </div>
@@ -321,7 +321,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={valueStr}
                 onChange={handleValueChange}
                 placeholder="R$ 0,00"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 0.75rem' }}
                 disabled={isBlocked}
               />
             </div>
@@ -335,7 +335,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
               value={startDate}
               onChange={handleDateChange}
               placeholder="dd/mm/aaaa"
-              style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: '16px', padding: '0.55rem 2.4rem' }}
+              style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: '16px', padding: '0.55rem 0.75rem' }}
               disabled={isBlocked}
             />
           </div>
@@ -352,7 +352,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={item.category} 
                 onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
                 disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 0.75rem' }}
               >
                 <option value="sinal">Sinal</option>
                 <option value="entrada">Entrada</option>
@@ -368,7 +368,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={recurrence} 
                 onChange={(e) => handleRecurrenceChange(e.target.value as RecurrenceType)}
                 disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 0.75rem' }}
               >
                 <option value="mensal">Mensal</option>
                 <option value="trimestral">Trimestral</option>
@@ -393,7 +393,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 onBlur={handleInstallmentsBlur}
                 placeholder="1"
                 disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 0.75rem' }}
               />
             </div>
 
@@ -410,7 +410,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 onClick={setCursorBeforePercent}
                 onKeyUp={setCursorBeforePercent}
                 placeholder="0%"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 0.75rem' }}
                 disabled={isBlocked}
               />
             </div>
@@ -427,7 +427,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={valueStr}
                 onChange={handleValueChange}
                 placeholder="R$ 0,00"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 0.75rem' }}
                 disabled={isBlocked}
               />
             </div>
@@ -439,7 +439,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={startDate}
                 onChange={handleDateChange}
                 placeholder="dd/mm/aaaa"
-                style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: '16px', padding: '0.55rem 0.75rem' }}
                 disabled={isBlocked}
               />
             </div>
@@ -457,7 +457,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={item.category} 
                 onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
                 disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 0.75rem' }}
               >
                 <option value="sinal">Sinal</option>
                 <option value="entrada">Entrada</option>
@@ -479,7 +479,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 onClick={setCursorBeforePercent}
                 onKeyUp={setCursorBeforePercent}
                 placeholder="0%"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 0.75rem' }}
                 disabled={isBlocked}
               />
             </div>
@@ -496,7 +496,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={valueStr}
                 onChange={handleValueChange}
                 placeholder="R$ 0,00"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 0.75rem' }}
                 disabled={isBlocked}
               />
             </div>
@@ -504,7 +504,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
             <div className="form-group">
               <label className="form-label">Vencimento</label>
               {item.category === 'chaves' ? (
-                <div style={{ width: '100%', fontSize: 'clamp(0.75rem, 2.8vw, 0.85rem)', color: 'var(--color-primary)', background: 'var(--color-success-bg)', border: '1px solid var(--color-success-border)', padding: '0.55rem 2.4rem', borderRadius: 'var(--radius-md)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                <div style={{ width: '100%', fontSize: 'clamp(0.75rem, 2.8vw, 0.85rem)', color: 'var(--color-primary)', background: 'var(--color-success-bg)', border: '1px solid var(--color-success-border)', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-md)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
                   <Key size={14} />
                   <span>{keyDeliveryDate ? formatDateBR(keyDeliveryDate) : 'Na Entrega'}</span>
                 </div>
@@ -514,7 +514,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                   value={startDate}
                   onChange={handleDateChange}
                   placeholder="dd/mm/aaaa"
-                  style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                  style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: '16px', padding: '0.55rem 0.75rem' }}
                   disabled={isBlocked}
                 />
               )}
@@ -590,12 +590,12 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
             type="button"
             onClick={handleAddPaymentRow}
             className="btn btn-primary btn-sm"
-            style={{ fontSize: '0.85rem', padding: '0.55rem 1.1rem', borderRadius: '25px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            style={{ fontSize: '0.85rem', padding: '0.55rem 1.1rem', borderRadius: '15px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
           >
             <Plus size={16} /> ADICIONAR
           </button>
 
-          <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--color-pantone-9580c)', letterSpacing: '0.02em' }}>
+          <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#DBFFC9', letterSpacing: '0.02em' }}>
             Subtotal {formatBRL(totalItemsSum)} ({formattedLaunchedPercent})
           </div>
         </div>
@@ -611,7 +611,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
           color: '#f59e0b', 
           background: 'rgba(245, 158, 11, 0.12)', 
           padding: '0.85rem 1.1rem', 
-          borderRadius: '25px', 
+          borderRadius: '15px', 
           border: '1px solid rgba(245, 158, 11, 0.35)', 
           display: 'flex', 
           alignItems: 'center', 

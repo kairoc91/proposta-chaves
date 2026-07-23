@@ -47,7 +47,7 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
           value={formattedProposal}
           onChange={handleProposalChange}
           placeholder="R$ 0,00"
-          style={{ fontWeight: 700, fontSize: '1.05rem', padding: '0.9rem 2.8rem' }}
+          style={{ fontWeight: 700, fontSize: '1.05rem', padding: '0.9rem 0.75rem' }}
         />
       </div>
 
@@ -62,7 +62,7 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
           value={keyDeliveryDate}
           onChange={(e) => setKeyDeliveryDate(e.target.value)}
           placeholder="dd/mm/aaaa"
-          style={{ fontWeight: 600, cursor: 'pointer', fontSize: '1.05rem', padding: '0.9rem 2.8rem' }}
+          style={{ fontWeight: 600, cursor: 'pointer', fontSize: '1.05rem', padding: '0.9rem 0.75rem' }}
           required
         />
       </div>
