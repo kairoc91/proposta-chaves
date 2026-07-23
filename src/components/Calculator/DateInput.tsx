@@ -85,13 +85,6 @@ export const DateInput: React.FC<DateInputProps> = ({
     onChange(e);
   };
 
-  const triggerPicker = () => {
-    if (disabled) return;
-    try {
-      hiddenDateRef.current?.showPicker?.();
-    } catch {}
-  };
-
   return (
     <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
       <input
@@ -103,7 +96,6 @@ export const DateInput: React.FC<DateInputProps> = ({
         value={displayText}
         placeholder={placeholder}
         onChange={handleTextChange}
-        onClick={triggerPicker}
         disabled={disabled}
         required={required}
         style={style}

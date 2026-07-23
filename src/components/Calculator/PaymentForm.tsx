@@ -265,7 +265,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={item.category} 
                 onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
               >
                 <option value="sinal">Sinal</option>
                 <option value="entrada">Entrada</option>
@@ -283,7 +283,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={entryType} 
                 onChange={(e) => handleEntryTypeChange(e.target.value as EntryType)}
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
               >
                 <option value="dinheiro">Dinheiro</option>
                 <option value="imovel">Imóvel</option>
@@ -310,7 +310,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 onClick={setCursorBeforePercent}
                 onKeyUp={setCursorBeforePercent}
                 placeholder="Percentual (%)"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
               <div className="input-helper-container">
@@ -325,7 +325,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={valueStr}
                 onChange={handleValueChange}
                 placeholder="Valor Entrada (R$ 0,00)"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
               <div className="input-helper-container">
@@ -342,7 +342,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={startDate}
                 onChange={handleDateChange}
                 placeholder="dd/mm/aaaa"
-                style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: '16px', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
               <div className="input-helper-container">
@@ -362,7 +362,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={item.category} 
                 onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
               >
                 <option value="sinal">Sinal</option>
                 <option value="entrada">Entrada</option>
@@ -380,7 +380,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={recurrence} 
                 onChange={(e) => handleRecurrenceChange(e.target.value as RecurrenceType)}
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
               >
                 <option value="mensal">Mensal</option>
                 <option value="trimestral">Trimestral</option>
@@ -406,7 +406,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 onBlur={handleInstallmentsBlur}
                 placeholder="Qtd. Parcelas (1 a 140)"
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
               />
               <div className="input-helper-container">
                 <InputHelper title="Qtd. Parcelas" text="Quantidade total de parcelas intermediárias." />
@@ -424,7 +424,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 onClick={setCursorBeforePercent}
                 onKeyUp={setCursorBeforePercent}
                 placeholder="Percentual (%)"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
               <div className="input-helper-container">
@@ -442,7 +442,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={valueStr}
                 onChange={handleValueChange}
                 placeholder="Valor Parcela (R$ 0,00)"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
               <div className="input-helper-container">
@@ -457,7 +457,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                   value={startDate}
                   onChange={handleDateChange}
                   placeholder="dd/mm/aaaa"
-                  style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                  style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: '16px', padding: '0.55rem 2.4rem' }}
                   disabled={isBlocked}
                 />
                 <div className="input-helper-container">
@@ -478,7 +478,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={item.category} 
                 onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
                 disabled={isBlocked}
-                style={{ fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
               >
                 <option value="sinal">Sinal</option>
                 <option value="entrada">Entrada</option>
@@ -501,7 +501,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 onClick={setCursorBeforePercent}
                 onKeyUp={setCursorBeforePercent}
                 placeholder="Percentual (%)"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
               <div className="input-helper-container">
@@ -519,7 +519,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                 value={valueStr}
                 onChange={handleValueChange}
                 placeholder="Valor (R$ 0,00)"
-                style={{ fontWeight: 600, fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
                 disabled={isBlocked}
               />
               <div className="input-helper-container">
@@ -545,7 +545,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
                     value={startDate}
                     onChange={handleDateChange}
                     placeholder="dd/mm/aaaa"
-                    style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: 'clamp(0.8rem, 3.2vw, 0.9rem)', padding: '0.55rem 2.4rem' }}
+                    style={{ fontWeight: 600, cursor: isBlocked ? 'not-allowed' : 'pointer', fontSize: '16px', padding: '0.55rem 2.4rem' }}
                     disabled={isBlocked}
                   />
                   <div className="input-helper-container">
