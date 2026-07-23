@@ -216,39 +216,46 @@ export async function generateProposalPDF({
       heightLeft -= pdfHeight;
     }
 
-    const pdfBlob = pdf.output('blob');
-    const fileName = 'proposta.pdf';
-    const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && window.innerWidth <= 1024);
 
-    // 1. Tentar Web Share API nativa com arquivo (funciona no Safari iOS e Android Chrome)
-    if (typeof navigator.share === 'function') {
-      try {
-        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-          await navigator.share({
-            files: [pdfFile],
-            title: 'Proposta Comercial',
-            text: 'Segue a proposta comercial em PDF.',
-          });
-          return;
-        }
-      } catch (shareError) {
-        if (shareError instanceof Error && shareError.name === 'AbortError') {
-          return; // Usuário fechou a janela de compartilhamento
+    if (isMobile) {
+      const pdfBlob = pdf.output('blob');
+      const fileName = 'proposta.pdf';
+      const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+      // Tentar Web Share API nativa com arquivo (funciona no Safari iOS e Chrome Android)
+      if (typeof navigator.share === 'function') {
+        try {
+          if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+            await navigator.share({
+              files: [pdfFile],
+              title: 'Proposta Comercial',
+              text: 'Segue a proposta comercial em PDF.',
+            });
+            return;
+          }
+        } catch (shareError) {
+          if (shareError instanceof Error && shareError.name === 'AbortError') {
+            return; // Usuário fechou a janela de compartilhamento
+          }
         }
       }
+
+      // Fallback para mobile se navigator.share falhar: download via Blob URL
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      return;
     }
 
-    // 2. Para Chrome Mobile (Android/iOS) onde navigator.share de arquivo falha:
-    // Criar um elemento <a> com Blob URL e forçar o download/abertura nativa no Chrome
-    const blobUrl = URL.createObjectURL(pdfBlob);
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = fileName;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    // No DESKTOP: Download direto garantido com pdf.save
+    pdf.save('proposta.pdf');
   } finally {
     // Limpar o container temporário
     if (pdfContainer.parentNode) {
