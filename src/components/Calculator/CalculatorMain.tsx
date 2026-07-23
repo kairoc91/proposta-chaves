@@ -5,7 +5,7 @@ import { ConfigForm } from './ConfigForm';
 import { PaymentForm } from './PaymentForm';
 import { generateProposalPDF } from '../../utils/pdfGenerator';
 import { formatBRL } from '../../utils/formatters';
-import { Download, RotateCcw, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Download, RotateCcw, AlertTriangle, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 
 export const CalculatorMain: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -127,7 +127,7 @@ export const CalculatorMain: React.FC = () => {
   return (
     <main className="container container-sm" style={{ paddingBottom: '3rem' }}>
       
-      <div style={{ textAlign: 'center', margin: '1.5rem 0 1.25rem 0' }}>
+      <div style={{ textAlign: 'center', margin: '1.75rem 0 2.75rem 0' }}>
         <div 
           style={{
             width: '180px',
@@ -142,49 +142,70 @@ export const CalculatorMain: React.FC = () => {
       </div>
 
       <div className="connected-stepper-wrapper animate-fade-in">
-        <div className="number-stepper-container">
-          <div className="stepper-line" />
+        {(() => {
+          const isStep1Complete = canAdvanceFromStep1 && currentStep > 1;
+          const isStep2Complete = isFullyDistributed && currentStep > 2;
+          const isStep3Complete = currentStep === 3 && isFullyDistributed;
 
-          <button
-            type="button"
-            onClick={() => setCurrentStep(1)}
-            className={`step-item ${currentStep === 1 ? 'active' : ''}`}
-            title="Passo 1: Preço e Data"
-            aria-label="Passo 1: Preço e Data"
-          >
-            <div className="step-number-circle">1</div>
-            <span className="step-number-label">PREÇO</span>
-          </button>
+          return (
+            <div className="number-stepper-container">
+              <div className="stepper-line">
+                <div 
+                  className="stepper-line-progress" 
+                  style={{ 
+                    width: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : '100%' 
+                  }} 
+                />
+              </div>
 
-          <button
-            type="button"
-            onClick={() => canAdvanceFromStep1 && setCurrentStep(2)}
-            disabled={!canAdvanceFromStep1}
-            className={`step-item ${currentStep === 2 ? 'active' : ''} ${!canAdvanceFromStep1 ? 'disabled' : ''}`}
-            title="Passo 2: Pagamentos"
-            aria-label="Passo 2: Pagamentos"
-          >
-            <div className="step-number-circle">2</div>
-            <span className="step-number-label">PAGAMENTO</span>
-          </button>
+              <button
+                type="button"
+                onClick={() => setCurrentStep(1)}
+                className={`step-item ${currentStep === 1 ? 'active' : ''} ${isStep1Complete ? 'completed' : ''}`}
+                title="Passo 1: Preço e Data"
+                aria-label="Passo 1: Preço e Data"
+              >
+                <div className="step-number-circle">
+                  {isStep1Complete ? <Check size={18} strokeWidth={3} /> : '1'}
+                </div>
+                <span className="step-number-label">PREÇO</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (canAdvanceFromStep1) {
-                if (currentStep === 1) setCurrentStep(2);
-                handleAdvanceToStep3();
-              }
-            }}
-            disabled={!canAdvanceFromStep1}
-            className={`step-item ${currentStep === 3 ? 'active' : ''} ${!canAdvanceFromStep1 ? 'disabled' : ''}`}
-            title="Passo 3: Resultado"
-            aria-label="Passo 3: Resultado"
-          >
-            <div className="step-number-circle">3</div>
-            <span className="step-number-label">RESULTADO</span>
-          </button>
-        </div>
+              <button
+                type="button"
+                onClick={() => canAdvanceFromStep1 && setCurrentStep(2)}
+                disabled={!canAdvanceFromStep1}
+                className={`step-item ${currentStep === 2 ? 'active' : ''} ${isStep2Complete ? 'completed' : ''} ${!canAdvanceFromStep1 ? 'disabled' : ''}`}
+                title="Passo 2: Pagamentos"
+                aria-label="Passo 2: Pagamentos"
+              >
+                <div className="step-number-circle">
+                  {isStep2Complete ? <Check size={18} strokeWidth={3} /> : '2'}
+                </div>
+                <span className="step-number-label">PAGAMENTO</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (canAdvanceFromStep1) {
+                    if (currentStep === 1) setCurrentStep(2);
+                    handleAdvanceToStep3();
+                  }
+                }}
+                disabled={!canAdvanceFromStep1}
+                className={`step-item ${currentStep === 3 ? 'active' : ''} ${isStep3Complete ? 'completed' : ''} ${!canAdvanceFromStep1 ? 'disabled' : ''}`}
+                title="Passo 3: Resultado"
+                aria-label="Passo 3: Resultado"
+              >
+                <div className="step-number-circle">
+                  {isStep3Complete ? <Check size={18} strokeWidth={3} /> : '3'}
+                </div>
+                <span className="step-number-label">RESULTADO</span>
+              </button>
+            </div>
+          );
+        })()}
 
         <div className="step-content-card">
           {currentStep === 1 && (

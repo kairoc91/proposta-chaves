@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from 'react';
 import { formatBRL, parseBRLString } from '../../utils/formatters';
-import { InputHelper } from './InputHelper';
 import { DateInput } from './DateInput';
 
 interface ConfigFormProps {
@@ -37,51 +36,35 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
       {/* Preço Proposta */}
       <div className="form-group">
         <label htmlFor="total-proposal-input" className="form-label">
-          Preço da Proposta
+          Valor total
         </label>
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <input
-            ref={proposalInputRef}
-            id="total-proposal-input"
-            type="text"
-            inputMode="numeric"
-            className="form-input"
-            value={formattedProposal}
-            onChange={handleProposalChange}
-            placeholder="Valor total"
-            style={{ fontWeight: 700, color: 'var(--color-pantone-9580c)', fontSize: '1.05rem', padding: '0.9rem 2.8rem' }}
-          />
-          <div className="input-helper-container">
-            <InputHelper 
-              title="Preço Proposta" 
-              text="Informe o valor total bruto da proposta comercial de compra do imóvel." 
-            />
-          </div>
-        </div>
+        <input
+          ref={proposalInputRef}
+          id="total-proposal-input"
+          type="text"
+          inputMode="numeric"
+          className="form-input"
+          value={formattedProposal}
+          onChange={handleProposalChange}
+          placeholder="R$ 0,00"
+          style={{ fontWeight: 700, fontSize: '1.05rem', padding: '0.9rem 2.8rem' }}
+        />
       </div>
 
       {/* Data de Entrega */}
       <div className="form-group">
         <label htmlFor="key-delivery-date-input" className="form-label">
-          Data de Entrega das Chaves
+          Data de entrega
         </label>
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <DateInput
-            id="key-delivery-date-input"
-            className="form-input"
-            value={keyDeliveryDate}
-            onChange={(e) => setKeyDeliveryDate(e.target.value)}
-            placeholder="dd/mm/aaaa"
-            style={{ fontWeight: 600, cursor: 'pointer', fontSize: '1.05rem', padding: '0.9rem 2.8rem' }}
-            required
-          />
-          <div className="input-helper-container">
-            <InputHelper 
-              title="Data de Entrega" 
-              text="Selecione a data prevista de entrega das chaves. Ela divide as parcelas em pagamentos ANTES e APÓS a entrega." 
-            />
-          </div>
-        </div>
+        <DateInput
+          id="key-delivery-date-input"
+          className="form-input"
+          value={keyDeliveryDate}
+          onChange={(e) => setKeyDeliveryDate(e.target.value)}
+          placeholder="dd/mm/aaaa"
+          style={{ fontWeight: 600, cursor: 'pointer', fontSize: '1.05rem', padding: '0.9rem 2.8rem' }}
+          required
+        />
       </div>
     </div>
   );
