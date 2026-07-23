@@ -71,11 +71,6 @@ export const CalculatorMain: React.FC = () => {
   }, []);
 
   const handleAdvanceToStep3 = () => {
-    if (totalItemsSum === 0) {
-      setStep2Warning('Por favor, adicione ao menos 1 pagamento antes de avançar.');
-      return;
-    }
-
     if (totalItemsSum < totalProposal) {
       setStep2Warning('Valor inferior ao total');
       return;
