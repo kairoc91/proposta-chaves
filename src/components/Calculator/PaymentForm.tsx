@@ -259,85 +259,98 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
         <>
           {/* LINHA 1 (Entrada): Categoria + Modalidade Entrada */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <select 
-                className="form-select" 
-                value={item.category} 
-                onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
-                disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
-              >
-                <option value="sinal">Sinal</option>
-                <option value="entrada">Entrada</option>
-                <option value="parcela_intermediaria">Intermediárias</option>
-                <option value="chaves">Chaves</option>
-              </select>
-              <div className="input-helper-container">
-                <InputHelper title="Categoria" text="Selecione a categoria de pagamento (Sinal, Entrada, Intermediárias ou Chaves)." />
+            <div className="form-group">
+              <label className="form-label">Categoria</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <select 
+                  className="form-select" 
+                  value={item.category} 
+                  onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
+                  disabled={isBlocked}
+                  style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                >
+                  <option value="sinal">Sinal</option>
+                  <option value="entrada">Entrada</option>
+                  <option value="parcela_intermediaria">Intermediárias</option>
+                  <option value="chaves">Chaves</option>
+                </select>
+                <div className="input-helper-container">
+                  <InputHelper title="Categoria" text="Selecione a categoria de pagamento (Sinal, Entrada, Intermediárias ou Chaves)." />
+                </div>
               </div>
             </div>
 
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <select 
-                className="form-select" 
-                value={entryType} 
-                onChange={(e) => handleEntryTypeChange(e.target.value as EntryType)}
-                disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
-              >
-                <option value="dinheiro">Dinheiro</option>
-                <option value="imovel">Imóvel</option>
-                <option value="veiculo">Veículo</option>
-                <option value="servico">Serviço</option>
-                <option value="outros">Outro</option>
-              </select>
-              <div className="input-helper-container">
-                <InputHelper title="Modalidade Entrada" text="Escolha a forma de pagamento da entrada (Dinheiro, Imóvel, Veículo, etc.)." />
+            <div className="form-group">
+              <label className="form-label">Forma de Pagamento</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <select 
+                  className="form-select" 
+                  value={entryType} 
+                  onChange={(e) => handleEntryTypeChange(e.target.value as EntryType)}
+                  disabled={isBlocked}
+                  style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                >
+                  <option value="dinheiro">Dinheiro</option>
+                  <option value="imovel">Imóvel</option>
+                  <option value="veiculo">Veículo</option>
+                  <option value="servico">Serviço</option>
+                  <option value="outros">Outro</option>
+                </select>
+                <div className="input-helper-container">
+                  <InputHelper title="Modalidade Entrada" text="Escolha a forma de pagamento da entrada (Dinheiro, Imóvel, Veículo, etc.)." />
+                </div>
               </div>
             </div>
           </div>
 
           {/* LINHA 2 (Entrada): Percentual (%) + Valor (R$) */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <input
-                ref={percentInputRef}
-                type="text"
-                inputMode="decimal"
-                className="form-input"
-                value={percentStr ? `${percentStr}%` : ''}
-                onChange={handlePercentChange}
-                onFocus={setCursorBeforePercent}
-                onClick={setCursorBeforePercent}
-                onKeyUp={setCursorBeforePercent}
-                placeholder="Percentual (%)"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
-                disabled={isBlocked}
-              />
-              <div className="input-helper-container">
-                <InputHelper title="Percentual (%)" text="Percentual que esta entrada representa em relação ao preço da proposta." />
+            <div className="form-group">
+              <label className="form-label">Percentual (%)</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  ref={percentInputRef}
+                  type="text"
+                  inputMode="decimal"
+                  className="form-input"
+                  value={percentStr ? `${percentStr}%` : ''}
+                  onChange={handlePercentChange}
+                  onFocus={setCursorBeforePercent}
+                  onClick={setCursorBeforePercent}
+                  onKeyUp={setCursorBeforePercent}
+                  placeholder="Percentual (%)"
+                  style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                  disabled={isBlocked}
+                />
+                <div className="input-helper-container">
+                  <InputHelper title="Percentual (%)" text="Percentual que esta entrada representa em relação ao preço da proposta." />
+                </div>
               </div>
             </div>
 
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <input
-                type="text"
-                inputMode="numeric"
-                className="form-input"
-                value={valueStr}
-                onChange={handleValueChange}
-                placeholder="Valor Entrada (R$ 0,00)"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
-                disabled={isBlocked}
-              />
-              <div className="input-helper-container">
-                <InputHelper title="Valor (R$)" text="Valor total em reais da entrada." />
+            <div className="form-group">
+              <label className="form-label">Valor (R$)</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="form-input"
+                  value={valueStr}
+                  onChange={handleValueChange}
+                  placeholder="Valor Entrada (R$ 0,00)"
+                  style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                  disabled={isBlocked}
+                />
+                <div className="input-helper-container">
+                  <InputHelper title="Valor (R$)" text="Valor total em reais da entrada." />
+                </div>
               </div>
             </div>
           </div>
 
           {/* LINHA 3 (Entrada): Vencimento */}
           <div className="form-group">
+            <label className="form-label">Vencimento</label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <DateInput
                 className="form-input"
@@ -358,104 +371,120 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
           {/* INTERMEDIÁRIAS LAYOUT */}
           {/* LINHA 1: Categoria + Recorrência */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <select 
-                className="form-select" 
-                value={item.category} 
-                onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
-                disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
-              >
-                <option value="sinal">Sinal</option>
-                <option value="entrada">Entrada</option>
-                <option value="parcela_intermediaria">Intermediárias</option>
-                <option value="chaves">Chaves</option>
-              </select>
-              <div className="input-helper-container">
-                <InputHelper title="Categoria" text="Selecione a categoria de pagamento." />
+            <div className="form-group">
+              <label className="form-label">Categoria</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <select 
+                  className="form-select" 
+                  value={item.category} 
+                  onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
+                  disabled={isBlocked}
+                  style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                >
+                  <option value="sinal">Sinal</option>
+                  <option value="entrada">Entrada</option>
+                  <option value="parcela_intermediaria">Intermediárias</option>
+                  <option value="chaves">Chaves</option>
+                </select>
+                <div className="input-helper-container">
+                  <InputHelper title="Categoria" text="Selecione a categoria de pagamento." />
+                </div>
               </div>
             </div>
 
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <select 
-                className="form-select" 
-                value={recurrence} 
-                onChange={(e) => handleRecurrenceChange(e.target.value as RecurrenceType)}
-                disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
-              >
-                <option value="mensal">Mensal</option>
-                <option value="trimestral">Trimestral</option>
-                <option value="semestral">Semestral</option>
-                <option value="anual">Anual</option>
-              </select>
-              <div className="input-helper-container">
-                <InputHelper title="Recorrência" text="Frequência de pagamento das parcelas (Mensal, Trimestral, Semestral ou Anual)." />
+            <div className="form-group">
+              <label className="form-label">Recorrência</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <select 
+                  className="form-select" 
+                  value={recurrence} 
+                  onChange={(e) => handleRecurrenceChange(e.target.value as RecurrenceType)}
+                  disabled={isBlocked}
+                  style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                >
+                  <option value="mensal">Mensal</option>
+                  <option value="trimestral">Trimestral</option>
+                  <option value="semestral">Semestral</option>
+                  <option value="anual">Anual</option>
+                </select>
+                <div className="input-helper-container">
+                  <InputHelper title="Recorrência" text="Frequência de pagamento das parcelas (Mensal, Trimestral, Semestral ou Anual)." />
+                </div>
               </div>
             </div>
           </div>
 
           {/* LINHA 2: Parcelas (Qtd) + Percentual (%) */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <input
-                type="number"
-                inputMode="numeric"
-                className="form-input"
-                value={installmentsCount || ''}
-                min={1}
-                max={140}
-                onChange={handleInstallmentsChange}
-                onBlur={handleInstallmentsBlur}
-                placeholder="Qtd. Parcelas (1 a 140)"
-                disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
-              />
-              <div className="input-helper-container">
-                <InputHelper title="Qtd. Parcelas" text="Quantidade total de parcelas intermediárias." />
+            <div className="form-group">
+              <label className="form-label">Qtd. Parcelas</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  className="form-input"
+                  value={installmentsCount || ''}
+                  min={1}
+                  max={140}
+                  onChange={handleInstallmentsChange}
+                  onBlur={handleInstallmentsBlur}
+                  placeholder="Qtd. Parcelas (1 a 140)"
+                  disabled={isBlocked}
+                  style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                />
+                <div className="input-helper-container">
+                  <InputHelper title="Qtd. Parcelas" text="Quantidade total de parcelas intermediárias." />
+                </div>
               </div>
             </div>
 
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <input
-                ref={percentInputRef}
-                type="text"
-                inputMode="decimal"
-                className="form-input"
-                value={percentStr ? `${percentStr}%` : ''}
-                onChange={handlePercentChange}
-                onFocus={setCursorBeforePercent}
-                onClick={setCursorBeforePercent}
-                onKeyUp={setCursorBeforePercent}
-                placeholder="Percentual (%)"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
-                disabled={isBlocked}
-              />
-              <div className="input-helper-container">
-                <InputHelper title="Percentual Total (%)" text="Percentual acumulado do conjunto de parcelas em relação à proposta." />
+            <div className="form-group">
+              <label className="form-label">Percentual Total (%)</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  ref={percentInputRef}
+                  type="text"
+                  inputMode="decimal"
+                  className="form-input"
+                  value={percentStr ? `${percentStr}%` : ''}
+                  onChange={handlePercentChange}
+                  onFocus={setCursorBeforePercent}
+                  onClick={setCursorBeforePercent}
+                  onKeyUp={setCursorBeforePercent}
+                  placeholder="Percentual (%)"
+                  style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                  disabled={isBlocked}
+                />
+                <div className="input-helper-container">
+                  <InputHelper title="Percentual Total (%)" text="Percentual acumulado do conjunto de parcelas em relação à proposta." />
+                </div>
               </div>
             </div>
           </div>
 
           {/* LINHA 3: Valor Parcela (R$) + Vencimento */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <input
-                type="text"
-                inputMode="numeric"
-                className="form-input"
-                value={valueStr}
-                onChange={handleValueChange}
-                placeholder="Valor Parcela (R$ 0,00)"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
-                disabled={isBlocked}
-              />
-              <div className="input-helper-container">
-                <InputHelper title="Valor Parcela (R$)" text="Valor de cada parcela intermediária em reais." />
+            <div className="form-group">
+              <label className="form-label">Valor Parcela (R$)</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="form-input"
+                  value={valueStr}
+                  onChange={handleValueChange}
+                  placeholder="Valor Parcela (R$ 0,00)"
+                  style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                  disabled={isBlocked}
+                />
+                <div className="input-helper-container">
+                  <InputHelper title="Valor Parcela (R$)" text="Valor de cada parcela intermediária em reais." />
+                </div>
               </div>
             </div>
 
             <div className="form-group">
+              <label className="form-label">Primeiro Vencimento</label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <DateInput
                   className="form-input"
@@ -477,64 +506,74 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
           {/* Sinal e Chaves */}
           {/* LINHA 1: Categoria + Percentual (%) */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <select 
-                className="form-select" 
-                value={item.category} 
-                onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
-                disabled={isBlocked}
-                style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
-              >
-                <option value="sinal">Sinal</option>
-                <option value="entrada">Entrada</option>
-                <option value="parcela_intermediaria">Intermediárias</option>
-                <option value="chaves">Chaves</option>
-              </select>
-              <div className="input-helper-container">
-                <InputHelper title="Categoria" text="Selecione a categoria do pagamento." />
+            <div className="form-group">
+              <label className="form-label">Categoria</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <select 
+                  className="form-select" 
+                  value={item.category} 
+                  onChange={(e) => handleCategoryChange(e.target.value as PaymentCategory)}
+                  disabled={isBlocked}
+                  style={{ fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                >
+                  <option value="sinal">Sinal</option>
+                  <option value="entrada">Entrada</option>
+                  <option value="parcela_intermediaria">Intermediárias</option>
+                  <option value="chaves">Chaves</option>
+                </select>
+                <div className="input-helper-container">
+                  <InputHelper title="Categoria" text="Selecione a categoria do pagamento." />
+                </div>
               </div>
             </div>
 
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <input
-                ref={percentInputRef}
-                type="text"
-                inputMode="decimal"
-                className="form-input"
-                value={percentStr ? `${percentStr}%` : ''}
-                onChange={handlePercentChange}
-                onFocus={setCursorBeforePercent}
-                onClick={setCursorBeforePercent}
-                onKeyUp={setCursorBeforePercent}
-                placeholder="Percentual (%)"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
-                disabled={isBlocked}
-              />
-              <div className="input-helper-container">
-                <InputHelper title="Percentual (%)" text="Percentual que este item representa na proposta." />
+            <div className="form-group">
+              <label className="form-label">Percentual (%)</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  ref={percentInputRef}
+                  type="text"
+                  inputMode="decimal"
+                  className="form-input"
+                  value={percentStr ? `${percentStr}%` : ''}
+                  onChange={handlePercentChange}
+                  onFocus={setCursorBeforePercent}
+                  onClick={setCursorBeforePercent}
+                  onKeyUp={setCursorBeforePercent}
+                  placeholder="Percentual (%)"
+                  style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                  disabled={isBlocked}
+                />
+                <div className="input-helper-container">
+                  <InputHelper title="Percentual (%)" text="Percentual que este item representa na proposta." />
+                </div>
               </div>
             </div>
           </div>
 
           {/* LINHA 2: Valor (R$) + Data de Vencimento / Entrega */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', alignItems: 'center' }}>
-            <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <input
-                type="text"
-                inputMode="numeric"
-                className="form-input"
-                value={valueStr}
-                onChange={handleValueChange}
-                placeholder="Valor (R$ 0,00)"
-                style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
-                disabled={isBlocked}
-              />
-              <div className="input-helper-container">
-                <InputHelper title="Valor (R$)" text="Valor total em reais do pagamento." />
+            <div className="form-group">
+              <label className="form-label">Valor (R$)</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="form-input"
+                  value={valueStr}
+                  onChange={handleValueChange}
+                  placeholder="Valor (R$ 0,00)"
+                  style={{ fontWeight: 600, fontSize: '16px', padding: '0.55rem 2.4rem' }}
+                  disabled={isBlocked}
+                />
+                <div className="input-helper-container">
+                  <InputHelper title="Valor (R$)" text="Valor total em reais do pagamento." />
+                </div>
               </div>
             </div>
 
             <div className="form-group">
+              <label className="form-label">Vencimento</label>
               {item.category === 'chaves' ? (
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <div style={{ width: '100%', fontSize: 'clamp(0.75rem, 2.8vw, 0.85rem)', color: 'var(--color-primary)', background: 'var(--color-success-bg)', border: '1px solid var(--color-success-border)', padding: '0.55rem 2.4rem', borderRadius: 'var(--radius-md)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>

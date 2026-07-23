@@ -380,10 +380,14 @@ h1, h2, h3 {
 }
 
 .form-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: 0.025em;
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--color-pantone-9580c);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+  text-align: center;
 }
 
 .form-input, .form-select {

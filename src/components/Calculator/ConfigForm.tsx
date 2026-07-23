@@ -36,6 +36,9 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '0.25rem 1rem' }}>
       {/* Preço Proposta */}
       <div className="form-group">
+        <label htmlFor="total-proposal-input" className="form-label">
+          Preço da Proposta
+        </label>
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <input
             ref={proposalInputRef}
@@ -59,6 +62,9 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
 
       {/* Data de Entrega */}
       <div className="form-group">
+        <label htmlFor="key-delivery-date-input" className="form-label">
+          Data de Entrega das Chaves
+        </label>
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <DateInput
             id="key-delivery-date-input"
