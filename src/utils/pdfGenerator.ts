@@ -219,26 +219,38 @@ export async function generateProposalPDF({
     const pdfBlob = pdf.output('blob');
     const pdfFile = new File([pdfBlob], 'proposta.pdf', { type: 'application/pdf' });
 
-    // Tentar usar o menu nativo de compartilhamento do celular
+    // Tentar usar o menu nativo de compartilhamento no mobile/desktop
     if (typeof navigator.share === 'function') {
+      // 1. Tentar compartilhar o arquivo PDF diretamente
       try {
-        // Testar primeiro se o navegador aceita compartilhar o arquivo PDF diretamente
-        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+        await navigator.share({
+          files: [pdfFile],
+          title: 'Proposta Comercial',
+          text: 'Segue a proposta comercial em PDF.',
+        });
+        return;
+      } catch (shareError) {
+        if (shareError instanceof Error && shareError.name === 'AbortError') {
+          return; // Usuário fechou o menu de compartilhamento
+        }
+      }
+
+      // 2. Se o navegador não aceitar a propriedade 'files', tenta compartilhar com o título/texto
+      try {
+        if (navigator.canShare && navigator.canShare({ title: 'Proposta Comercial' })) {
           await navigator.share({
-            files: [pdfFile],
             title: 'Proposta Comercial',
-            text: 'Segue a proposta comercial em PDF.',
+            text: 'Proposta comercial gerada com sucesso.',
           });
-          return;
         }
       } catch (shareError) {
         if (shareError instanceof Error && shareError.name === 'AbortError') {
-          return; // Usuário simplesmente cancelou a janela de compartilhamento
+          return;
         }
       }
     }
 
-    // Fallback: Se não suportar compartilhamento de arquivos, faz o download do arquivo PDF
+    // Fallback final: Download direto do arquivo PDF
     pdf.save('proposta.pdf');
   } finally {
     // Limpar o container temporário
