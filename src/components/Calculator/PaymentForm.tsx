@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { PaymentItem, PaymentCategory, EntryType, RecurrenceType } from '../../utils/calculatorEngine';
 import { formatBRL, parseBRLString, formatDateBR } from '../../utils/formatters';
-import { Plus, X, Key, AlertCircle, AlertTriangle, Wallet } from 'lucide-react';
+import { Plus, Trash2, Key, AlertCircle, AlertTriangle, Wallet } from 'lucide-react';
 import { DateInput } from './DateInput';
 
 interface PaymentFormProps {
@@ -243,7 +243,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
         gap: '0.75rem'
       }}
     >
-      {/* Botão Excluir (X) no Canto Superior Direito */}
+      {/* Botão Excluir (Lixeira) no Canto Superior Direito */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
         <button
           type="button"
@@ -251,21 +251,18 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
           title="Excluir pagamento"
           aria-label="Excluir pagamento"
           style={{
-            background: '#97FF66',
+            background: 'transparent',
             border: 'none',
-            color: 'rgb(0, 36, 30)',
-            width: '24px',
-            height: '24px',
-            borderRadius: '50%',
+            color: '#DBFFC9',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            padding: 0,
+            padding: '0.2rem',
             transition: 'all 0.2s ease',
           }}
         >
-          <X size={14} strokeWidth={2.5} />
+          <Trash2 size={18} strokeWidth={2} />
         </button>
       </div>
 

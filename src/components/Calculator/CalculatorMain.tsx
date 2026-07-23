@@ -285,7 +285,20 @@ export const CalculatorMain: React.FC = () => {
                     type="button"
                     onClick={handleGeneratePDF}
                     className="btn btn-primary"
-                    style={{ padding: '0.55rem 1.25rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontWeight: 800, borderRadius: '15px', fontSize: '0.85rem', flexShrink: 0 }}
+                    style={{ 
+                      padding: '0.55rem 1.25rem', 
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '0.4rem', 
+                      fontWeight: 800, 
+                      borderRadius: '15px', 
+                      fontSize: '0.85rem', 
+                      flexShrink: 0,
+                      backgroundColor: '#DBFFC9',
+                      color: '#00241E',
+                      borderColor: '#DBFFC9'
+                    }}
                     disabled={isGeneratingPDF}
                   >
                     <Download size={16} />
@@ -306,13 +319,13 @@ export const CalculatorMain: React.FC = () => {
                         stroke="rgba(219, 255, 201, 0.12)"
                         strokeWidth={strokeWidth}
                       />
-                      {/* Segmento Pago (Pantone 902 C) */}
+                      {/* Segmento Pago (#DBFFC9) */}
                       <circle
                         cx="135"
                         cy="135"
                         r={radius}
                         fill="transparent"
-                        stroke="var(--color-pantone-902c)"
+                        stroke="#DBFFC9"
                         strokeWidth={strokeWidth}
                         strokeDasharray={strokeDasharray}
                         strokeLinecap="round"
@@ -328,7 +341,7 @@ export const CalculatorMain: React.FC = () => {
                       <strong style={{ fontSize: '1.85rem', fontWeight: 800, color: '#ffffff', lineHeight: 1.2 }}>
                         {formatBRL(rawPaid)}
                       </strong>
-                      <span style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--color-pantone-902c)', marginTop: '0.3rem' }}>
+                      <span style={{ fontSize: '1.65rem', fontWeight: 800, color: '#DBFFC9', marginTop: '0.3rem' }}>
                         {formattedPaidPercent}
                       </span>
                     </div>
@@ -356,7 +369,7 @@ export const CalculatorMain: React.FC = () => {
                         width: '38px',
                         height: '20px',
                         borderRadius: '12px',
-                        backgroundColor: includeKeysInPercent ? 'var(--color-pantone-902c)' : 'rgba(255, 255, 255, 0.15)',
+                        backgroundColor: includeKeysInPercent ? '#97FF66' : 'rgba(255, 255, 255, 0.15)',
                         position: 'relative',
                         transition: 'background-color 0.25s ease',
                         cursor: 'pointer',
