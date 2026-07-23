@@ -41,6 +41,7 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
             ref={proposalInputRef}
             id="total-proposal-input"
             type="text"
+            inputMode="numeric"
             className="form-input"
             value={formattedProposal}
             onChange={handleProposalChange}

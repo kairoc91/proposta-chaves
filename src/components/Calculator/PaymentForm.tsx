@@ -303,6 +303,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
               <input
                 ref={percentInputRef}
                 type="text"
+                inputMode="decimal"
                 className="form-input"
                 value={percentStr ? `${percentStr}%` : ''}
                 onChange={handlePercentChange}
@@ -321,6 +322,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
             <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 type="text"
+                inputMode="numeric"
                 className="form-input"
                 value={valueStr}
                 onChange={handleValueChange}
@@ -398,6 +400,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
             <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 type="number"
+                inputMode="numeric"
                 className="form-input"
                 value={installmentsCount || ''}
                 min={1}
@@ -417,6 +420,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
               <input
                 ref={percentInputRef}
                 type="text"
+                inputMode="decimal"
                 className="form-input"
                 value={percentStr ? `${percentStr}%` : ''}
                 onChange={handlePercentChange}
@@ -438,6 +442,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
             <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 type="text"
+                inputMode="numeric"
                 className="form-input"
                 value={valueStr}
                 onChange={handleValueChange}
@@ -494,6 +499,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
               <input
                 ref={percentInputRef}
                 type="text"
+                inputMode="decimal"
                 className="form-input"
                 value={percentStr ? `${percentStr}%` : ''}
                 onChange={handlePercentChange}
@@ -515,6 +521,7 @@ const PaymentRowItem: React.FC<PaymentRowItemProps> = ({
             <div className="form-group" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 type="text"
+                inputMode="numeric"
                 className="form-input"
                 value={valueStr}
                 onChange={handleValueChange}
