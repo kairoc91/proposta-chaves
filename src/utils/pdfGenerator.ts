@@ -216,6 +216,24 @@ export async function generateProposalPDF({
       heightLeft -= pdfHeight;
     }
 
+    const pdfBlob = pdf.output('blob');
+    const pdfFile = new File([pdfBlob], 'proposta.pdf', { type: 'application/pdf' });
+
+    if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+      try {
+        await navigator.share({
+          files: [pdfFile],
+          title: 'Proposta Comercial',
+          text: 'Segue a proposta comercial em PDF.',
+        });
+        return;
+      } catch (shareError) {
+        if (shareError instanceof Error && shareError.name === 'AbortError') {
+          return;
+        }
+      }
+    }
+
     pdf.save('proposta.pdf');
   } finally {
     // Limpar o container temporário
