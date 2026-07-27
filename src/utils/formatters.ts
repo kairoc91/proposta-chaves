@@ -27,8 +27,29 @@ export function parseBRLString(value: string): number {
 export function formatDateBR(dateStr: string): string {
   if (!dateStr) return '';
   try {
+    const parts = dateStr.split('-');
+    if (parts.length === 2) {
+      return `${parts[1]}/${parts[0]}`;
+    }
     const date = parseISO(dateStr);
     return format(date, 'dd/MM/yyyy');
+  } catch (error) {
+    return dateStr;
+  }
+}
+
+/**
+ * Formata uma data no formato ISO (AAAA-MM ou AAAA-MM-DD) para MM/AAAA.
+ */
+export function formatMonthYearBR(dateStr: string): string {
+  if (!dateStr) return '';
+  try {
+    const parts = dateStr.split('-');
+    if (parts.length >= 2) {
+      return `${parts[1]}/${parts[0]}`;
+    }
+    const date = parseISO(dateStr);
+    return format(date, 'MM/yyyy');
   } catch (error) {
     return dateStr;
   }

@@ -1,4 +1,4 @@
-import { parseISO, addMonths, addYears, isBefore, startOfDay, format } from 'date-fns';
+import { parseISO, addMonths, addYears, isBefore, startOfDay, endOfMonth, endOfDay, format } from 'date-fns';
 
 export type PaymentCategory = 'sinal' | 'entrada' | 'parcela_intermediaria' | 'chaves';
 
@@ -46,9 +46,16 @@ export function generateInstallmentsFromItem(item: PaymentItem, keyDeliveryDateS
   const rawStart = item.startDate ? parseISO(item.startDate) : new Date();
   const start = isNaN(rawStart.getTime()) ? new Date() : rawStart;
 
-  const rawKeyDate = keyDeliveryDateStr ? parseISO(keyDeliveryDateStr) : null;
-  const hasKeyDate = rawKeyDate && !isNaN(rawKeyDate.getTime());
-  const keyDeliveryDate = hasKeyDate ? startOfDay(rawKeyDate) : null;
+  let keyDeliveryDate: Date | null = null;
+  if (keyDeliveryDateStr) {
+    // Pode vir como YYYY-MM ou YYYY-MM-DD
+    const isoStr = keyDeliveryDateStr.length === 7 ? `${keyDeliveryDateStr}-01` : keyDeliveryDateStr;
+    const rawKeyDate = parseISO(isoStr);
+    if (!isNaN(rawKeyDate.getTime())) {
+      // Usar o final do mês (fim do dia do último dia do mês) como limite pré-chaves
+      keyDeliveryDate = endOfDay(endOfMonth(rawKeyDate));
+    }
+  }
 
   const count = Math.max(1, item.installmentsCount || 1);
 

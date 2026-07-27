@@ -41,6 +41,7 @@ Thumbs.db
 *.sw?
 *.tmp
 *.bak
+*.backup
 
 # Coverage and testing
 coverage
@@ -48,4 +49,9 @@ coverage
 
 # AI and Local Agent cache
 .gemini
-.agents
+
+# Backups and temporary files
+backup
+backup/
+backups
+backups/

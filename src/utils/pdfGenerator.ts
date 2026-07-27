@@ -1,7 +1,7 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import type { PaymentItem, CalculationResult } from './calculatorEngine';
-import { formatBRL, formatDateBR } from './formatters';
+import { formatBRL, formatDateBR, formatMonthYearBR } from './formatters';
 
 interface GeneratePDFParams {
   totalProposal: number;
@@ -14,7 +14,7 @@ const getCategoryLabel = (cat: string) => {
   switch (cat) {
     case 'sinal': return 'Sinal';
     case 'entrada': return 'Entrada';
-    case 'parcela_intermediaria': return 'Intermediárias';
+    case 'parcela_intermediaria': return 'Parcelas';
     case 'chaves': return 'Chaves';
     default: return cat;
   }
@@ -41,6 +41,24 @@ export async function generateProposalPDF({
   pdfContainer.style.textAlign = 'left';
 
   const todayStr = formatDateBR(new Date().toISOString().split('T')[0]);
+
+  // Ordenação das modalidades: Sinal -> Entrada -> Parcelas -> Chaves
+  const categoryOrderMap: Record<string, number> = {
+    sinal: 1,
+    entrada: 2,
+    parcela_intermediaria: 3,
+    chaves: 4,
+  };
+
+  const sortedPaymentItems = [...paymentItems].sort((a, b) => {
+    const orderA = categoryOrderMap[a.category] || 99;
+    const orderB = categoryOrderMap[b.category] || 99;
+    if (orderA !== orderB) return orderA - orderB;
+    if (a.startDate && b.startDate) {
+      return a.startDate.localeCompare(b.startDate);
+    }
+    return 0;
+  });
 
   // Cálculos do resumo dos lançamentos
   const totalItemsSum = paymentItems.reduce((acc, item) => acc + (item.value * item.installmentsCount), 0);
@@ -77,17 +95,17 @@ export async function generateProposalPDF({
       </h2>
       <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 6px; overflow: hidden; border: 1px solid #00241E;">
         <thead>
-          <tr style="background-color: #00241E; border-bottom: 1px solid #00241E;">
-            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9;">Preço da Proposta</th>
-            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9;">Data de Entrega</th>
-            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9;">Até a Entrega</th>
-            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9;">Após Entrega</th>
+          <tr style="background-color: #E8EECF; border-bottom: 1px solid #00241E;">
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E;">Preço da Proposta</th>
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E;">Data de Entrega</th>
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E;">Até a Entrega</th>
+            <th style="padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E;">Após Entrega</th>
           </tr>
         </thead>
         <tbody>
           <tr style="border-bottom: 1px solid #00241E;">
             <td style="padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 400; color: #00241E;">${formatBRL(totalProposal)}</td>
-            <td style="padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 400; color: #00241E;">${keyDeliveryDate ? formatDateBR(keyDeliveryDate) : 'Não informada'}</td>
+            <td style="padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 400; color: #00241E;">${keyDeliveryDate ? formatMonthYearBR(keyDeliveryDate) : 'Não informada'}</td>
             <td style="padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 400; color: #00241E;">
               ${formatBRL(result.totalPaidBeforeKeys)} (${result.percentagePaidBeforeKeys.toFixed(2)}%)
             </td>
@@ -107,22 +125,22 @@ export async function generateProposalPDF({
       </h2>
       <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 6px; overflow: hidden; border: 1px solid #00241E;">
         <thead>
-          <tr style="background-color: #00241E; border-bottom: 1px solid #00241E;">
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 30px;">#</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 110px;">Modalidade</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9;">Descrição</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 65px;">Qtd</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 90px;">Vencimento</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 110px;">Valor un.</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 110px;">Subtotal</th>
-            <th style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #DBFFC9; width: 65px;">(%)</th>
+          <tr style="background-color: #E8EECF; border-bottom: 1px solid #00241E;">
+            <th style="padding: 10px 8px; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E; width: 32px;">#</th>
+            <th style="padding: 10px 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E; width: 105px;">Modalidade</th>
+            <th style="padding: 10px 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E; width: 115px;">Descrição</th>
+            <th style="padding: 10px 8px; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E; width: 45px;">Qtd</th>
+            <th style="padding: 10px 10px; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E; width: 95px;">Vencimento</th>
+            <th style="padding: 10px 10px; text-align: right; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E; width: 120px;">Valor un.</th>
+            <th style="padding: 10px 10px; text-align: right; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E; width: 120px;">Subtotal</th>
+            <th style="padding: 10px 10px; text-align: right; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E; width: 60px;">(%)</th>
           </tr>
         </thead>
         <tbody>
           ${
-            paymentItems.length === 0
+            sortedPaymentItems.length === 0
               ? `<tr><td colspan="8" style="padding: 20px; text-align: left; color: #00241E; font-size: 11px;">Nenhum pagamento cadastrado na proposta</td></tr>`
-              : paymentItems.map((item, idx) => {
+              : sortedPaymentItems.map((item, idx) => {
                   const itemTotal = item.value * item.installmentsCount;
                   const itemPercent = totalProposal > 0 ? (itemTotal / totalProposal) * 100 : 0;
                   const isEven = idx % 2 === 1;
@@ -151,34 +169,34 @@ export async function generateProposalPDF({
 
                   return `
                     <tr style="background-color: ${isEven ? '#f9fafb' : '#ffffff'}; border-bottom: 1px solid #00241E;">
-                      <td style="padding: 10px 12px; text-align: left; font-size: 11px; color: #00241E; font-weight: 400;">${idx + 1}</td>
-                      <td style="padding: 10px 12px; text-align: left;">
-                        <span style="font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 4px; background-color: #00241E; color: #97FF66; display: block; text-align: center;">
+                      <td style="padding: 10px 8px; text-align: center; font-size: 11px; color: #00241E; font-weight: 400;">${idx + 1}</td>
+                      <td style="padding: 10px 10px; text-align: left;">
+                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 0; background-color: transparent; color: #00241E; display: block; text-align: left;">
                           ${getCategoryLabel(item.category)}
                         </span>
                       </td>
-                      <td style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 400; color: #00241E;">${getPDFItemDescription(item)}</td>
-                      <td style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 400; color: #00241E;">${item.installmentsCount > 1 ? `${item.installmentsCount}x` : '1x'}</td>
-                      <td style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 400; color: #00241E;">${formatDateBR(item.startDate)}</td>
-                      <td style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 400; color: #00241E;">${formatBRL(item.value)}</td>
-                      <td style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 400; color: #00241E;">${formatBRL(itemTotal)}</td>
-                      <td style="padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 400; color: #00241E;">${itemPercent.toFixed(2)}%</td>
+                      <td style="padding: 10px 10px; text-align: left; font-size: 11px; font-weight: 400; color: #00241E;">${getPDFItemDescription(item)}</td>
+                      <td style="padding: 10px 8px; text-align: center; font-size: 11px; font-weight: 400; color: #00241E;">${item.installmentsCount > 1 ? `${item.installmentsCount}x` : '1x'}</td>
+                      <td style="padding: 10px 10px; text-align: center; font-size: 11px; font-weight: 400; color: #00241E;">${formatDateBR(item.startDate)}</td>
+                      <td style="padding: 10px 10px; text-align: right; font-size: 11px; font-weight: 400; color: #00241E;">${formatBRL(item.value)}</td>
+                      <td style="padding: 10px 10px; text-align: right; font-size: 11px; font-weight: 400; color: #00241E;">${formatBRL(itemTotal)}</td>
+                      <td style="padding: 10px 10px; text-align: right; font-size: 11px; font-weight: 400; color: #00241E;">${itemPercent.toFixed(2)}%</td>
                     </tr>
                   `;
                 }).join('')
           }
         </tbody>
         <tfoot>
-          <tr style="background-color: #DBFFC9; border-top: 1px solid #00241E;">
+          <tr style="background-color: #E8EECF; border-top: 1px solid #00241E;">
             <td colspan="6" style="padding: 10px 14px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #00241E; text-align: left;">Total Lançado:</td>
-            <td style="padding: 10px 14px; font-size: 11px; font-weight: 800; color: #00241E; text-align: left;">${formatBRL(totalItemsSum)}</td>
-            <td style="padding: 10px 14px; font-size: 11px; font-weight: 800; color: #00241E; text-align: left;">${launchedPercent.toFixed(2)}%</td>
+            <td style="padding: 10px 10px; font-size: 11px; font-weight: 800; color: #00241E; text-align: right;">${formatBRL(totalItemsSum)}</td>
+            <td style="padding: 10px 10px; font-size: 11px; font-weight: 800; color: #00241E; text-align: right;">${launchedPercent.toFixed(2)}%</td>
           </tr>
           ${unlaunchedSum > 0 ? `
             <tr style="background-color: #ffffff; border-top: 1px solid #00241E;">
               <td colspan="6" style="padding: 10px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #00241E; text-align: left;">Saldo Não Lançado:</td>
-              <td style="padding: 10px 14px; font-size: 11px; font-weight: 700; color: #00241E; text-align: left;">${formatBRL(unlaunchedSum)}</td>
-              <td style="padding: 10px 14px; font-size: 11px; font-weight: 700; color: #00241E; text-align: left;">${unlaunchedPercent.toFixed(2)}%</td>
+              <td style="padding: 10px 10px; font-size: 11px; font-weight: 700; color: #00241E; text-align: right;">${formatBRL(unlaunchedSum)}</td>
+              <td style="padding: 10px 10px; font-size: 11px; font-weight: 700; color: #00241E; text-align: right;">${unlaunchedPercent.toFixed(2)}%</td>
             </tr>
           ` : ''}
         </tfoot>

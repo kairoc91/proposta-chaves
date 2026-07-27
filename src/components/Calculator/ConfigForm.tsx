@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { formatBRL, parseBRLString } from '../../utils/formatters';
-import { DateInput } from './DateInput';
+import { MonthYearInput } from './MonthYearInput';
 
 interface ConfigFormProps {
   totalProposal: number;
@@ -56,12 +56,12 @@ export const ConfigForm: React.FC<ConfigFormProps> = ({
         <label htmlFor="key-delivery-date-input" className="form-label">
           Data de entrega
         </label>
-        <DateInput
+        <MonthYearInput
           id="key-delivery-date-input"
           className="form-input"
           value={keyDeliveryDate}
-          onChange={(e) => setKeyDeliveryDate(e.target.value)}
-          placeholder="dd/mm/aaaa"
+          onChange={(val) => setKeyDeliveryDate(val)}
+          placeholder="mm/aaaa"
           style={{ fontWeight: 600, cursor: 'pointer', fontSize: '1.05rem', padding: '0.9rem 0.75rem' }}
           required
         />

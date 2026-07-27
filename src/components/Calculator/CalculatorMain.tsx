@@ -5,7 +5,7 @@ import { ConfigForm } from './ConfigForm';
 import { PaymentForm } from './PaymentForm';
 import { generateProposalPDF } from '../../utils/pdfGenerator';
 import { formatBRL } from '../../utils/formatters';
-import { Download, RotateCcw, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Download, RotateCcw, Check } from 'lucide-react';
 
 export const CalculatorMain: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -26,19 +26,22 @@ export const CalculatorMain: React.FC = () => {
   const canAdvanceFromStep1 = totalProposal > 0 && Boolean(keyDeliveryDate);
 
   const navButtonStyle: React.CSSProperties = {
-    background: 'none',
-    border: 'none',
-    color: '#DBFFC9',
+    backgroundColor: '#DBFFC9',
+    color: '#00241E',
+    border: '1px solid #DBFFC9',
+    borderRadius: '15px',
     fontSize: '0.85rem',
     fontWeight: 800,
     display: 'inline-flex',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: '0.3rem',
     cursor: 'pointer',
-    padding: '0.4rem 0',
+    padding: '0.45rem 0.85rem',
     textTransform: 'uppercase',
     letterSpacing: '0.04em',
     userSelect: 'none',
+    transition: 'all 0.2s ease',
   };
 
   const totalItemsSum = paymentItems.reduce((acc, item) => acc + (item.value * (item.installmentsCount || 1)), 0);
@@ -72,12 +75,12 @@ export const CalculatorMain: React.FC = () => {
 
   const handleAdvanceToStep3 = () => {
     if (totalItemsSum < totalProposal) {
-      setStep2Warning('Valor inferior ao total');
+      setStep2Warning('adicione ou altere um pagamento para totalizar o valor da proposta');
       return;
     }
 
     if (totalItemsSum > totalProposal) {
-      setStep2Warning('Valor excede ao total');
+      setStep2Warning('remova ou altere um pagamento para totalizar o valor da proposta');
       return;
     }
 
@@ -211,7 +214,6 @@ export const CalculatorMain: React.FC = () => {
                   title={canAdvanceFromStep1 ? 'Avançar para o próximo passo' : 'Preencha o Preço da Proposta e a Data de Entrega para avançar'}
                 >
                   <span>AVANÇAR</span>
-                  <ChevronRight size={18} />
                 </button>
               </div>
 
@@ -232,7 +234,6 @@ export const CalculatorMain: React.FC = () => {
                   onClick={() => setCurrentStep(1)}
                   style={navButtonStyle}
                 >
-                  <ChevronLeft size={18} />
                   <span>VOLTAR</span>
                 </button>
 
@@ -242,7 +243,6 @@ export const CalculatorMain: React.FC = () => {
                   style={navButtonStyle}
                 >
                   <span>AVANÇAR</span>
-                  <ChevronRight size={18} />
                 </button>
               </div>
 
@@ -277,7 +277,6 @@ export const CalculatorMain: React.FC = () => {
                     onClick={() => setCurrentStep(2)}
                     style={navButtonStyle}
                   >
-                    <ChevronLeft size={18} />
                     <span>VOLTAR</span>
                   </button>
 
