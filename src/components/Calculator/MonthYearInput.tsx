@@ -2,7 +2,8 @@ import React, { useRef } from 'react';
 
 export interface MonthYearInputProps {
   id?: string;
-  value: string; // ISO format YYYY-MM ou YYYY-MM-DD
+  /** Data no formato ISO (YYYY-MM ou YYYY-MM-DD) */
+  value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
@@ -13,7 +14,9 @@ export interface MonthYearInputProps {
   isShortYear?: boolean;
 }
 
-// Converter YYYY-MM ou YYYY-MM-DD para MM/AAAA ou MM/AA
+/**
+ * Converte data ISO (YYYY-MM ou YYYY-MM-DD) em formato amigável de exibição (MM/AAAA ou MM/AA).
+ */
 const isoToMonthYearDisplay = (isoStr: string, isShortYear: boolean = false): string => {
   if (!isoStr) return '';
   const parts = isoStr.split('-');
@@ -29,7 +32,9 @@ const isoToMonthYearDisplay = (isoStr: string, isShortYear: boolean = false): st
   return isoStr;
 };
 
-// Garantir formato YYYY-MM para o input type="month"
+/**
+ * Garante o formato ISO YYYY-MM exigido pelo input nativo de tipo month.
+ */
 const toMonthIso = (isoStr: string): string => {
   if (!isoStr) return '';
   const parts = isoStr.split('-');
@@ -39,6 +44,11 @@ const toMonthIso = (isoStr: string): string => {
   return isoStr;
 };
 
+/**
+ * Campo de seleção de mês e ano otimizado para navegadores desktop e dispositivos móveis.
+ * Utiliza um overlay nativo transparente (opacity: 0) sobre o campo formatado para garantir
+ * que toques no iOS Safari abram o seletor nativo sem requerer disparos JS bloqueados.
+ */
 export const MonthYearInput: React.FC<MonthYearInputProps> = ({
   id,
   value,
@@ -56,8 +66,7 @@ export const MonthYearInput: React.FC<MonthYearInputProps> = ({
   const monthValue = toMonthIso(value);
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVal = e.target.value; // Formato YYYY-MM
-    onChange(newVal);
+    onChange(e.target.value);
   };
 
   const handleFocus = () => {
@@ -79,7 +88,6 @@ export const MonthYearInput: React.FC<MonthYearInputProps> = ({
         cursor: disabled ? 'not-allowed' : 'pointer'
       }}
     >
-      {/* Input de texto visível exibindo o mês/ano formatado em MM/AAAA */}
       <input
         id={id}
         type="text"
@@ -99,7 +107,6 @@ export const MonthYearInput: React.FC<MonthYearInputProps> = ({
         name={name}
       />
 
-      {/* Input nativo transparente sobreposto 100% que recebe o toque do usuário no mobile */}
       <input
         ref={hiddenMonthRef}
         type="month"

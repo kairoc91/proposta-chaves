@@ -1,5 +1,4 @@
 import { parseISO, format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 /**
  * Formata um número para o padrão de moeda brasileiro (BRL) sem casas decimais (centavos).
@@ -50,19 +49,6 @@ export function formatMonthYearBR(dateStr: string): string {
     }
     const date = parseISO(dateStr);
     return format(date, 'MM/yyyy');
-  } catch (error) {
-    return dateStr;
-  }
-}
-
-/**
- * Formata uma data por extenso amigável em português.
- */
-export function formatDateLongBR(dateStr: string): string {
-  if (!dateStr) return '';
-  try {
-    const date = parseISO(dateStr);
-    return format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
   } catch (error) {
     return dateStr;
   }

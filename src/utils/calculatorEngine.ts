@@ -1,31 +1,29 @@
 import { parseISO, addMonths, addYears, isBefore, startOfDay, endOfMonth, endOfDay, format } from 'date-fns';
 
 export type PaymentCategory = 'sinal' | 'entrada' | 'parcela_intermediaria' | 'chaves';
-
 export type EntryType = 'dinheiro' | 'imovel' | 'veiculo' | 'servico' | 'outros';
-
 export type RecurrenceType = 'mensal' | 'trimestral' | 'semestral' | 'anual';
 
 export interface PaymentItem {
   id: string;
   category: PaymentCategory;
   description: string;
-  value: number; // Valor de cada parcela
-  entryType?: EntryType; // Apenas para categoria 'entrada'
-  recurrence?: RecurrenceType; // Para parcelas intermediárias e chaves
-  installmentsCount: number; // Quantidade de parcelas (mínimo 1)
-  startDate: string; // Data da primeira parcela (ou do pagamento único): AAAA-MM-DD
+  value: number;
+  entryType?: EntryType;
+  recurrence?: RecurrenceType;
+  installmentsCount: number;
+  startDate: string;
 }
 
 export interface Installment {
-  id: string; // ID único: ${itemId}-${index}
+  id: string;
   itemId: string;
   category: PaymentCategory;
   entryType?: EntryType;
   description: string;
   value: number;
   dueDate: Date;
-  dueDateString: string; // Formato AAAA-MM-DD
+  dueDateString: string;
   isBeforeKeys: boolean;
 }
 
@@ -38,7 +36,8 @@ export interface CalculationResult {
 }
 
 /**
- * Gera todas as parcelas individuais a partir de um item de pagamento recorrente ou único.
+ * Expande um item de lançamento em suas parcelas individuais com datas calculadas
+ * e sinaliza se a data de vencimento precede o limite da entrega das chaves.
  */
 export function generateInstallmentsFromItem(item: PaymentItem, keyDeliveryDateStr: string): Installment[] {
   const installments: Installment[] = [];
@@ -48,11 +47,9 @@ export function generateInstallmentsFromItem(item: PaymentItem, keyDeliveryDateS
 
   let keyDeliveryDate: Date | null = null;
   if (keyDeliveryDateStr) {
-    // Pode vir como YYYY-MM ou YYYY-MM-DD
     const isoStr = keyDeliveryDateStr.length === 7 ? `${keyDeliveryDateStr}-01` : keyDeliveryDateStr;
     const rawKeyDate = parseISO(isoStr);
     if (!isNaN(rawKeyDate.getTime())) {
-      // Usar o final do mês (fim do dia do último dia do mês) como limite pré-chaves
       keyDeliveryDate = endOfDay(endOfMonth(rawKeyDate));
     }
   }
@@ -63,10 +60,8 @@ export function generateInstallmentsFromItem(item: PaymentItem, keyDeliveryDateS
     let dueDate: Date;
 
     if (item.category === 'sinal' || (item.category === 'entrada' && !item.recurrence)) {
-      // Sinal e Entrada sem recorrência são pagamentos únicos na data de início
       dueDate = start;
     } else {
-      // Itens recorrentes (intermediárias, chaves parceladas, etc.)
       const recurrence = item.recurrence || 'mensal';
       switch (recurrence) {
         case 'mensal':
@@ -87,8 +82,6 @@ export function generateInstallmentsFromItem(item: PaymentItem, keyDeliveryDateS
     }
 
     const dueDateStartOfDay = startOfDay(dueDate);
-    // Se a data de entrega das chaves for fornecida, compara se a parcela vence estritamente ANTES das chaves.
-    // Se NÃO for fornecida data de entrega ainda, considera a parcela como parte do montante (true).
     const isBeforeKeys = keyDeliveryDate ? isBefore(dueDateStartOfDay, keyDeliveryDate) : true;
     const dueDateString = format(dueDate, 'yyyy-MM-dd');
 
@@ -111,7 +104,8 @@ export function generateInstallmentsFromItem(item: PaymentItem, keyDeliveryDateS
 }
 
 /**
- * Orquestra o cálculo completo do fluxo de pagamentos em relação ao valor da proposta e a data de chaves.
+ * Calcula o consolidado financeiro da proposta imobiliária, totalizando os valores
+ * quitados antes e depois da entrega das chaves e o percentual de cobertura da proposta.
  */
 export function calculatePaymentFlow(
   totalProposal: number,
@@ -121,20 +115,16 @@ export function calculatePaymentFlow(
 ): CalculationResult {
   const installments: Installment[] = [];
 
-  // 1. Gerar todas as parcelas
   for (const item of paymentItems) {
     installments.push(...generateInstallmentsFromItem(item, keyDeliveryDateStr));
   }
 
-  // Ordenar parcelas por data de vencimento
   installments.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
 
-  // 2. Filtrar e somar
   let totalPaidBeforeKeys = 0;
   let totalPaidAfterKeys = 0;
 
   for (const inst of installments) {
-    // Se for item da categoria 'chaves', obedece à preferência do usuário (includeKeysInPercent)
     const isCountedBeforeKeys = inst.category === 'chaves'
       ? includeKeysInPercent
       : inst.isBeforeKeys;
@@ -146,7 +136,6 @@ export function calculatePaymentFlow(
     }
   }
 
-  // 3. Percentual pago
   const percentagePaidBeforeKeys = totalProposal > 0 
     ? (totalPaidBeforeKeys / totalProposal) * 100 
     : 0;

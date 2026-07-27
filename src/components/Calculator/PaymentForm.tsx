@@ -863,7 +863,6 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
           margin: '0.5rem 0'
         }}>
           <span>Nenhum lançamento cadastrado.</span>
-          <span>Clique no botão <u style={{ textDecoration: 'underline' }}>adicionar</u>.</span>
         </div>
       )}
 
