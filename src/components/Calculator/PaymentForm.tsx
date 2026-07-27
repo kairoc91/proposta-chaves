@@ -10,6 +10,7 @@ interface PaymentFormProps {
   keyDeliveryDate: string;
   totalProposal: number;
   step2Warning?: string | null;
+  onWizardStateChange?: (isOpen: boolean) => void;
 }
 
 interface PaymentItemCardProps {
@@ -193,7 +194,7 @@ const InlinePaymentWizard: React.FC<InlinePaymentWizardProps> = ({
   onCancel,
 }) => {
   const [step, setStep] = useState<1 | 2 | 3>(itemToEdit ? 2 : 1);
-  const [category, setCategory] = useState<PaymentCategory>(itemToEdit?.category || 'sinal');
+  const [category, setCategory] = useState<PaymentCategory | null>(itemToEdit?.category || null);
   const [entryType, setEntryType] = useState<EntryType>(itemToEdit?.entryType || 'dinheiro');
   const [recurrence, setRecurrence] = useState<RecurrenceType>(itemToEdit?.recurrence || 'mensal');
   const [installmentsCount, setInstallmentsCount] = useState<number>(itemToEdit?.installmentsCount || 12);
@@ -296,15 +297,16 @@ const InlinePaymentWizard: React.FC<InlinePaymentWizardProps> = ({
       description = 'Saldo de Chaves (À Vista)';
     }
 
+    const activeCategory: PaymentCategory = category || 'sinal';
     const newItem: PaymentItem = {
       id: itemToEdit ? itemToEdit.id : `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      category,
+      category: activeCategory,
       description,
       value: numericVal,
       installmentsCount: actualCount,
-      entryType: category === 'entrada' ? entryType : undefined,
-      recurrence: category === 'parcela_intermediaria' ? recurrence : undefined,
-      startDate: category === 'chaves' ? (keyDeliveryDate || startDate) : startDate,
+      entryType: activeCategory === 'entrada' ? entryType : undefined,
+      recurrence: activeCategory === 'parcela_intermediaria' ? recurrence : undefined,
+      startDate: activeCategory === 'chaves' ? (keyDeliveryDate || startDate) : startDate,
     };
 
     onSaveComplete(newItem);
@@ -386,36 +388,48 @@ const InlinePaymentWizard: React.FC<InlinePaymentWizardProps> = ({
               { id: 'entrada', label: 'Entrada', badge: 'E' },
               { id: 'parcela_intermediaria', label: 'Parcelas', badge: 'P' },
               { id: 'chaves', label: 'Saldo de Chaves', badge: 'C' },
-            ].map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => handleSelectCategory(cat.id as PaymentCategory)}
-                style={{
-                  background: category === cat.id ? 'rgba(219, 255, 201, 0.15)' : 'rgba(219, 255, 201, 0.05)',
-                  border: category === cat.id ? '1px solid #DBFFC9' : '1px solid rgba(219, 255, 201, 0.2)',
-                  borderRadius: '14px',
-                  padding: '0.85rem 0.6rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  transition: 'all 0.2s ease',
-                  color: '#DBFFC9',
-                }}
-                className="wizard-type-card"
-              >
-                <div style={{
-                  width: '28px', height: '28px', borderRadius: '50%', background: '#DBFFC9', color: '#00241E',
-                  fontWeight: 900, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                  {cat.badge}
-                </div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{cat.label}</span>
-              </button>
-            ))}
+            ].map((cat) => {
+              const isSelected = category === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => handleSelectCategory(cat.id as PaymentCategory)}
+                  style={{
+                    background: isSelected ? 'rgba(219, 255, 201, 0.15)' : 'rgba(219, 255, 201, 0.04)',
+                    border: isSelected ? '1px solid #DBFFC9' : '1px solid rgba(219, 255, 201, 0.15)',
+                    borderRadius: '14px',
+                    padding: '0.85rem 0.6rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    color: '#DBFFC9',
+                  }}
+                  className="wizard-type-card"
+                >
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: isSelected ? '#DBFFC9' : 'rgba(219, 255, 201, 0.15)',
+                    color: isSelected ? '#00241E' : '#DBFFC9',
+                    fontWeight: 900,
+                    fontSize: '0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease',
+                  }}>
+                    {cat.badge}
+                  </div>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>{cat.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -686,6 +700,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
   keyDeliveryDate,
   totalProposal,
   step2Warning,
+  onWizardStateChange,
 }) => {
   const isBlocked = !totalProposal || !keyDeliveryDate;
   const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -694,11 +709,13 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
   const handleOpenWizard = () => {
     setItemToEdit(null);
     setIsWizardOpen(true);
+    if (onWizardStateChange) onWizardStateChange(true);
   };
 
   const handleEditItem = (item: PaymentItem) => {
     setItemToEdit(item);
     setIsWizardOpen(true);
+    if (onWizardStateChange) onWizardStateChange(true);
   };
 
   const handleSaveFromWizard = (newItem: PaymentItem) => {
@@ -711,11 +728,13 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
     });
     setIsWizardOpen(false);
     setItemToEdit(null);
+    if (onWizardStateChange) onWizardStateChange(false);
   };
 
   const handleCancelWizard = () => {
     setIsWizardOpen(false);
     setItemToEdit(null);
+    if (onWizardStateChange) onWizardStateChange(false);
   };
 
   const handleRemoveItem = (id: string) => {

@@ -15,6 +15,7 @@ export const CalculatorMain: React.FC = () => {
   const [includeKeysInPercent, setIncludeKeysInPercent] = useState<boolean>(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState<boolean>(false);
   const [step2Warning, setStep2Warning] = useState<string | null>(null);
+  const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
 
   const result = calculatePaymentFlow(
     totalProposal, 
@@ -228,23 +229,25 @@ export const CalculatorMain: React.FC = () => {
 
           {currentStep === 2 && (
             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem', padding: '0 1rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(1)}
-                  style={navButtonStyle}
-                >
-                  <span>VOLTAR</span>
-                </button>
+              {!isWizardOpen && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem', padding: '0 1rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                    style={navButtonStyle}
+                  >
+                    <span>VOLTAR</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={handleAdvanceToStep3}
-                  style={navButtonStyle}
-                >
-                  <span>AVANÇAR</span>
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={handleAdvanceToStep3}
+                    style={navButtonStyle}
+                  >
+                    <span>AVANÇAR</span>
+                  </button>
+                </div>
+              )}
 
               <PaymentForm
                 paymentItems={paymentItems}
@@ -252,6 +255,7 @@ export const CalculatorMain: React.FC = () => {
                 keyDeliveryDate={keyDeliveryDate}
                 totalProposal={totalProposal}
                 step2Warning={step2Warning}
+                onWizardStateChange={setIsWizardOpen}
               />
             </div>
           )}
