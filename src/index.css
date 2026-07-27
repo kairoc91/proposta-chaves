@@ -68,6 +68,11 @@
   padding: 0;
 }
 
+html, body {
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   font-family: var(--font-primary);
   background-color: rgb(0, 36, 30);
@@ -76,6 +81,17 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Evitar zoom automático do iOS Safari ao focar em inputs no mobile */
+@media screen and (max-width: 767px) {
+  input,
+  select,
+  textarea,
+  .form-input,
+  .form-select {
+    font-size: 16px !important;
+  }
 }
 
 #root {
