@@ -55,58 +55,72 @@ export const MonthYearInput: React.FC<MonthYearInputProps> = ({
   const displayVal = isoToMonthYearDisplay(value, isShortYear);
   const monthValue = toMonthIso(value);
 
-  const handleContainerClick = () => {
-    if (disabled) return;
-    try {
-      if (hiddenMonthRef.current) {
-        if (typeof hiddenMonthRef.current.showPicker === 'function') {
-          hiddenMonthRef.current.showPicker();
-        } else {
-          hiddenMonthRef.current.click();
-        }
-      }
-    } catch {}
-  };
-
   const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = e.target.value; // Formato YYYY-MM
     onChange(newVal);
   };
 
+  const handleFocus = () => {
+    if (disabled) return;
+    try {
+      if (hiddenMonthRef.current && typeof hiddenMonthRef.current.showPicker === 'function') {
+        hiddenMonthRef.current.showPicker();
+      }
+    } catch {}
+  };
+
   return (
     <div 
-      onClick={handleContainerClick}
-      style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center', cursor: disabled ? 'not-allowed' : 'pointer' }}
+      style={{
+        position: 'relative',
+        width: '100%',
+        display: 'inline-flex',
+        alignItems: 'center',
+        cursor: disabled ? 'not-allowed' : 'pointer'
+      }}
     >
       {/* Input de texto visível exibindo o mês/ano formatado em MM/AAAA */}
       <input
         id={id}
         type="text"
         readOnly
+        tabIndex={-1}
         value={displayVal}
         placeholder={placeholder}
         className={className}
-        style={{ ...style, cursor: disabled ? 'not-allowed' : 'pointer' }}
+        style={{
+          ...style,
+          width: '100%',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          boxSizing: 'border-box',
+        }}
         disabled={disabled}
         required={required}
         name={name}
       />
 
-      {/* Input oculto do tipo month para abrir o seletor nativo */}
+      {/* Input nativo transparente sobreposto 100% que recebe o toque do usuário no mobile */}
       <input
         ref={hiddenMonthRef}
         type="month"
         value={monthValue}
         onChange={handleMonthChange}
+        onFocus={handleFocus}
         disabled={disabled}
         style={{
           position: 'absolute',
-          opacity: 0,
-          pointerEvents: 'none',
-          width: '1px',
-          height: '1px',
-          bottom: 0,
+          top: 0,
           left: 0,
+          width: '100%',
+          height: '100%',
+          opacity: 0,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          zIndex: 10,
+          border: 'none',
+          margin: 0,
+          padding: 0,
+          appearance: 'none',
+          WebkitAppearance: 'none',
         }}
       />
     </div>
