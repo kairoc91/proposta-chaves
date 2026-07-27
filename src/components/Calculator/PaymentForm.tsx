@@ -197,7 +197,7 @@ const InlinePaymentWizard: React.FC<InlinePaymentWizardProps> = ({
   const [category, setCategory] = useState<PaymentCategory | null>(itemToEdit?.category || null);
   const [entryType, setEntryType] = useState<EntryType>(itemToEdit?.entryType || 'dinheiro');
   const [recurrence, setRecurrence] = useState<RecurrenceType>(itemToEdit?.recurrence || 'mensal');
-  const [installmentsCount, setInstallmentsCount] = useState<number>(itemToEdit?.installmentsCount || 12);
+  const [installmentsCount, setInstallmentsCount] = useState<number | ''>(itemToEdit?.installmentsCount || 12);
   const [startDate, setStartDate] = useState<string>(itemToEdit?.startDate || new Date().toISOString().split('T')[0]);
 
   const [percentStr, setPercentStr] = useState<string>(() => {
@@ -226,12 +226,12 @@ const InlinePaymentWizard: React.FC<InlinePaymentWizardProps> = ({
     if (cat === 'sinal' || cat === 'chaves') {
       setInstallmentsCount(1);
     } else if (cat === 'parcela_intermediaria') {
-      if (installmentsCount <= 1) setInstallmentsCount(12);
+      if (typeof installmentsCount !== 'number' || installmentsCount <= 1) setInstallmentsCount(12);
     }
     setStep(2);
   };
 
-  const actualCount = category === 'parcela_intermediaria' ? Math.max(1, installmentsCount) : 1;
+  const actualCount = category === 'parcela_intermediaria' ? Math.max(1, typeof installmentsCount === 'number' ? installmentsCount : 1) : 1;
 
   // Preencher automaticamente com todo o saldo restante
   const handleFillRemaining = () => {
@@ -484,8 +484,23 @@ const InlinePaymentWizard: React.FC<InlinePaymentWizardProps> = ({
                   min={1}
                   max={140}
                   className="form-input"
-                  value={installmentsCount || ''}
-                  onChange={(e) => setInstallmentsCount(parseInt(e.target.value, 10) || 1)}
+                  value={installmentsCount}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setInstallmentsCount('');
+                      return;
+                    }
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) {
+                      setInstallmentsCount(num);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (installmentsCount === '' || installmentsCount < 1) {
+                      setInstallmentsCount(1);
+                    }
+                  }}
                   style={{ fontWeight: 600, fontSize: '0.85rem', padding: '0.5rem', textAlign: 'center' }}
                 />
                 <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginTop: '0.2rem' }}>
