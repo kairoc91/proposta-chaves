@@ -215,6 +215,31 @@ const InlinePaymentWizard: React.FC<InlinePaymentWizardProps> = ({
     itemToEdit && itemToEdit.value > 0 ? formatBRL(itemToEdit.value) : ''
   );
 
+  const percentInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handlePercentCursor = React.useCallback(() => {
+    if (percentInputRef.current) {
+      const el = percentInputRef.current;
+      const val = el.value;
+      const percentIndex = val.indexOf('%');
+      if (percentIndex !== -1) {
+        let start = el.selectionStart;
+        let end = el.selectionEnd;
+        if (start !== null && start > percentIndex) start = percentIndex;
+        if (end !== null && end > percentIndex) end = percentIndex;
+        if (start !== null && end !== null && (start !== el.selectionStart || end !== el.selectionEnd)) {
+          el.setSelectionRange(start, end);
+        }
+      }
+    }
+  }, []);
+
+  React.useLayoutEffect(() => {
+    if (step === 3 && percentInputRef.current) {
+      handlePercentCursor();
+    }
+  }, [step, percentStr, handlePercentCursor]);
+
   const currentEditingVal = itemToEdit ? itemToEdit.value * (itemToEdit.installmentsCount || 1) : 0;
   const netExistingSum = Math.max(0, existingItemsSum - currentEditingVal);
   const remainingValue = Math.max(0, totalProposal - netExistingSum);
@@ -629,11 +654,30 @@ const InlinePaymentWizard: React.FC<InlinePaymentWizardProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
               <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#DBFFC9' }}>Porcentagem (%):</label>
               <input
+                ref={percentInputRef}
                 type="text"
                 inputMode="decimal"
                 className="form-input"
                 value={percentStr ? `${percentStr}%` : ''}
-                onChange={handlePercentChange}
+                onChange={(e) => {
+                  handlePercentChange(e);
+                  requestAnimationFrame(handlePercentCursor);
+                }}
+                onClick={() => requestAnimationFrame(handlePercentCursor)}
+                onFocus={() => requestAnimationFrame(handlePercentCursor)}
+                onSelect={() => requestAnimationFrame(handlePercentCursor)}
+                onKeyUp={() => requestAnimationFrame(handlePercentCursor)}
+                onKeyDown={(e) => {
+                  if ((e.key === 'ArrowRight' || e.key === 'End') && percentInputRef.current) {
+                    const el = percentInputRef.current;
+                    const percentIndex = el.value.indexOf('%');
+                    if (percentIndex !== -1 && el.selectionStart === percentIndex && el.selectionEnd === percentIndex) {
+                      e.preventDefault();
+                      return;
+                    }
+                  }
+                  requestAnimationFrame(handlePercentCursor);
+                }}
                 placeholder="0%"
                 style={{ fontWeight: 600, fontSize: '0.85rem', padding: '0.5rem', textAlign: 'center' }}
               />
